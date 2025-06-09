@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Clock, User, FileText, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface MeetLink {
   id: string;
@@ -8,7 +10,7 @@ interface MeetLink {
   name: string;
   creator: string;
   notes: string;
-  timestamp: string;
+  created_at: string;
 }
 
 const Index = () => {
@@ -21,27 +23,69 @@ const Index = () => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [expandedNotes, setExpandedNotes] = useState<{ [key: string]: boolean }>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  // Initialize with demo link
+  // Fetch links from database on component mount
   useEffect(() => {
-    const demoLink: MeetLink = {
-      id: '1',
-      url: 'https://meet.google.com/hep-hwei-bmn',
-      name: 'Kickoff Meeting',
-      creator: 'Admin',
-      notes: 'This is the starting point for our Google Meet sharing platform.',
-      timestamp: new Date().toLocaleString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      })
-    };
-    setLinks([demoLink]);
+    fetchLinks();
   }, []);
+
+  // Set up real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('meet-links-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'meet_links'
+        },
+        (payload) => {
+          console.log('New link added:', payload);
+          const newLink = payload.new as MeetLink;
+          setLinks(prev => [newLink, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchLinks = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('meet_links')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching links:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load meeting links. Please refresh the page.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setLinks(data || []);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while loading links.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const validateGoogleMeetUrl = (url: string): boolean => {
     const meetUrlPattern = /^https:\/\/meet\.google\.com\/[a-z-]+$/;
@@ -88,28 +132,49 @@ const Index = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const newLink: MeetLink = {
-      id: Date.now().toString(),
-      url: formData.url,
-      name: formData.name,
-      creator: formData.creator,
-      notes: formData.notes,
-      timestamp: new Date().toLocaleString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      })
-    };
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('meet_links')
+        .insert([
+          {
+            url: formData.url,
+            name: formData.name,
+            creator: formData.creator,
+            notes: formData.notes
+          }
+        ]);
 
-    setLinks(prev => [newLink, ...prev]);
-    setFormData({ url: '', name: '', creator: '', notes: '' });
+      if (error) {
+        console.error('Error inserting link:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save meeting link. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Clear form on success
+      setFormData({ url: '', name: '', creator: '', notes: '' });
+      toast({
+        title: "Success",
+        description: "Meeting link added successfully!"
+      });
+
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleNotes = (id: string) => {
@@ -118,6 +183,18 @@ const Index = () => {
 
   const truncateText = (text: string, maxLength: number): string => {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  };
+
+  const formatTimestamp = (timestamp: string): string => {
+    return new Date(timestamp).toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
   };
 
   return (
@@ -207,10 +284,11 @@ const Index = () => {
 
             <button
               onClick={handleSubmit}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-300 ease-out transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center space-x-2"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-all duration-300 ease-out transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <Plus size={20} />
-              <span>Add Meet Link</span>
+              <span>{isSubmitting ? 'Adding...' : 'Add Meet Link'}</span>
             </button>
           </div>
         </div>
@@ -226,7 +304,11 @@ const Index = () => {
         {/* Links Display */}
         <div className="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
           <div className="max-h-96 overflow-y-auto">
-            {links.length === 0 ? (
+            {isLoading ? (
+              <div className="p-8 text-center text-muted-foreground">
+                <p>Loading meeting links...</p>
+              </div>
+            ) : links.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 <p>No meeting links yet. Add your first one above!</p>
               </div>
@@ -256,7 +338,7 @@ const Index = () => {
                       <div className="flex flex-wrap items-center space-x-6 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-2">
                           <Clock size={14} />
-                          <span>{link.timestamp}</span>
+                          <span>{formatTimestamp(link.created_at)}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <User size={14} />
