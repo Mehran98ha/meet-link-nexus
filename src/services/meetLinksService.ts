@@ -27,17 +27,6 @@ export interface UpdateMeetLinkData {
 }
 
 /**
- * Set the current user context for RLS policies
- */
-const setUserContext = async (userId: string) => {
-  await supabase.rpc('set_config', {
-    setting_name: 'app.current_user_id',
-    setting_value: userId,
-    is_local: true
-  });
-};
-
-/**
  * Fetch all meet links
  */
 export const fetchMeetLinks = async (): Promise<MeetLink[]> => {
@@ -82,18 +71,16 @@ export const createMeetLink = async (linkData: CreateMeetLinkData): Promise<Meet
 export const updateMeetLink = async (id: string, updates: UpdateMeetLinkData): Promise<MeetLink> => {
   const userId = getUserId();
   
-  // Set user context for RLS
-  await setUserContext(userId);
-  
   const { data, error } = await supabase
     .from('meet_links')
     .update(updates)
     .eq('id', id)
+    .eq('creator_id', userId)
     .select()
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116' || error.message.includes('row-level security')) {
+    if (error.code === 'PGRST116') {
       throw new Error('You are not authorized to edit this link. Only the creator can modify it.');
     }
     throw new Error(`Failed to update meet link: ${error.message}`);
@@ -108,16 +95,14 @@ export const updateMeetLink = async (id: string, updates: UpdateMeetLinkData): P
 export const deleteMeetLink = async (id: string): Promise<void> => {
   const userId = getUserId();
   
-  // Set user context for RLS
-  await setUserContext(userId);
-  
   const { error } = await supabase
     .from('meet_links')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('creator_id', userId);
 
   if (error) {
-    if (error.code === 'PGRST116' || error.message.includes('row-level security')) {
+    if (error.code === 'PGRST116') {
       throw new Error('You are not authorized to delete this link. Only the creator can remove it.');
     }
     throw new Error(`Failed to delete meet link: ${error.message}`);
