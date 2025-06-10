@@ -1,17 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Clock, User, FileText, ExternalLink } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-interface MeetLink {
-  id: string;
-  url: string;
-  name: string;
-  creator: string;
-  notes: string;
-  created_at: string;
-}
+import { isLocalStorageAvailable, getUserId } from '@/utils/userIdentity';
+import { 
+  fetchMeetLinks, 
+  createMeetLink, 
+  updateMeetLink, 
+  deleteMeetLink,
+  MeetLink,
+  CreateMeetLinkData,
+  UpdateMeetLinkData
+} from '@/services/meetLinksService';
+import LinkItem from '@/components/LinkItem';
+import EditLinkModal from '@/components/EditLinkModal';
+import StorageWarning from '@/components/StorageWarning';
 
 const Index = () => {
   const [links, setLinks] = useState<MeetLink[]>([]);
@@ -25,61 +28,36 @@ const Index = () => {
   const [expandedNotes, setExpandedNotes] = useState<{ [key: string]: boolean }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [editingLink, setEditingLink] = useState<MeetLink | null>(null);
+  const [showStorageWarning, setShowStorageWarning] = useState(false);
   const { toast } = useToast();
+
+  // Check localStorage availability on mount
+  useEffect(() => {
+    if (!isLocalStorageAvailable()) {
+      setShowStorageWarning(true);
+    }
+    // Initialize user ID
+    getUserId();
+  }, []);
 
   // Fetch links from database on component mount
   useEffect(() => {
-    fetchLinks();
+    loadLinks();
   }, []);
 
-  // Set up real-time subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('meet-links-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'meet_links'
-        },
-        (payload) => {
-          console.log('New link added:', payload);
-          const newLink = payload.new as MeetLink;
-          setLinks(prev => [newLink, ...prev]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const fetchLinks = async () => {
+  const loadLinks = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('meet_links')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching links:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load meeting links. Please refresh the page.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setLinks(data || []);
+      const data = await fetchMeetLinks();
+      setLinks(data);
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('Error fetching links:', error);
       toast({
         title: "Error",
-        description: "Something went wrong while loading links.",
+        description: "Failed to load meeting links. Please refresh the page.",
         variant: "destructive"
       });
     } finally {
@@ -137,27 +115,18 @@ const Index = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('meet_links')
-        .insert([
-          {
-            url: formData.url,
-            name: formData.name,
-            creator: formData.creator,
-            notes: formData.notes
-          }
-        ]);
+      const linkData: CreateMeetLinkData = {
+        url: formData.url,
+        name: formData.name,
+        creator: formData.creator,
+        notes: formData.notes
+      };
 
-      if (error) {
-        console.error('Error inserting link:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save meeting link. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-
+      const newLink = await createMeetLink(linkData);
+      
+      // Add new link to the beginning of the list
+      setLinks(prev => [newLink, ...prev]);
+      
       // Clear form on success
       setFormData({ url: '', name: '', creator: '', notes: '' });
       toast({
@@ -166,10 +135,10 @@ const Index = () => {
       });
 
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('Error creating link:', error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: "Failed to save meeting link. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -177,24 +146,73 @@ const Index = () => {
     }
   };
 
+  const handleEdit = (link: MeetLink) => {
+    setEditingLink(link);
+  };
+
+  const handleUpdateLink = async (id: string, updates: UpdateMeetLinkData) => {
+    setIsUpdating(true);
+    try {
+      const updatedLink = await updateMeetLink(id, updates);
+      
+      // Update the link in the list
+      setLinks(prev => 
+        prev.map(link => link.id === id ? updatedLink : link)
+      );
+      
+      toast({
+        title: "Success",
+        description: "Meeting link updated successfully!"
+      });
+      
+    } catch (error) {
+      console.error('Error updating link:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update meeting link.",
+        variant: "destructive"
+      });
+      throw error; // Re-throw to prevent modal from closing
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this meeting link? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingIds(prev => new Set(prev).add(id));
+    try {
+      await deleteMeetLink(id);
+      
+      // Remove the link from the list
+      setLinks(prev => prev.filter(link => link.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Meeting link deleted successfully!"
+      });
+      
+    } catch (error) {
+      console.error('Error deleting link:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete meeting link.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
+  };
+
   const toggleNotes = (id: string) => {
     setExpandedNotes(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const truncateText = (text: string, maxLength: number): string => {
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-  };
-
-  const formatTimestamp = (timestamp: string): string => {
-    return new Date(timestamp).toLocaleString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
   };
 
   return (
@@ -207,9 +225,16 @@ const Index = () => {
             <p className="text-muted-foreground text-lg">Professional Google Meet link sharing platform</p>
           </div>
 
+          {/* Storage Warning */}
+          <StorageWarning 
+            isVisible={showStorageWarning} 
+            onDismiss={() => setShowStorageWarning(false)} 
+          />
+
           {/* Submission Form */}
           <div className="bg-gray-50 rounded-lg p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* URL field */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Google Meet URL *
@@ -227,6 +252,7 @@ const Index = () => {
                 {errors.url && <p className="text-red-500 text-sm mt-1">{errors.url}</p>}
               </div>
 
+              {/* Name field */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Meeting Name * (50 chars max)
@@ -249,6 +275,7 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Creator field */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Creator Name *
@@ -266,6 +293,7 @@ const Index = () => {
                 {errors.creator && <p className="text-red-500 text-sm mt-1">{errors.creator}</p>}
               </div>
 
+              {/* Notes field */}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Notes (500 chars max)
@@ -298,7 +326,7 @@ const Index = () => {
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="mb-6">
           <h2 className="text-2xl font-light text-foreground mb-2">Recent Meet Links</h2>
-          <p className="text-muted-foreground">Click on any meeting name to join</p>
+          <p className="text-muted-foreground">Click on any meeting name to join. Edit or delete your own links.</p>
         </div>
 
         {/* Links Display */}
@@ -313,69 +341,32 @@ const Index = () => {
                 <p>No meeting links yet. Add your first one above!</p>
               </div>
             ) : (
-              <div className="divide-y divide-border">
+              <div>
                 {links.map((link, index) => (
-                  <div
+                  <LinkItem
                     key={link.id}
-                    className="p-6 hover:bg-gray-50 transition-all duration-300 animate-fade-in"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="flex flex-col space-y-3">
-                      {/* Meeting Name and Link */}
-                      <div className="flex items-start justify-between">
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-lg font-medium text-blue-600 hover:text-blue-800 transition-colors duration-300 flex items-center space-x-2 group"
-                        >
-                          <span>{link.name}</span>
-                          <ExternalLink size={16} className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </a>
-                      </div>
-
-                      {/* Metadata */}
-                      <div className="flex flex-wrap items-center space-x-6 text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-2">
-                          <Clock size={14} />
-                          <span>{formatTimestamp(link.created_at)}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <User size={14} />
-                          <span className="italic">{link.creator}</span>
-                        </div>
-                      </div>
-
-                      {/* Notes */}
-                      {link.notes && (
-                        <div className="flex items-start space-x-2">
-                          <FileText size={14} className="mt-1 text-muted-foreground flex-shrink-0" />
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">
-                              {expandedNotes[link.id] 
-                                ? link.notes 
-                                : truncateText(link.notes, 100)
-                              }
-                              {link.notes.length > 100 && (
-                                <button
-                                  onClick={() => toggleNotes(link.id)}
-                                  className="ml-2 text-blue-600 hover:text-blue-800 transition-colors duration-300 text-xs underline"
-                                >
-                                  {expandedNotes[link.id] ? 'Show less' : 'Show more'}
-                                </button>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    link={link}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    isDeleting={deletingIds.has(link.id)}
+                    expandedNotes={expandedNotes}
+                    onToggleNotes={toggleNotes}
+                  />
                 ))}
               </div>
             )}
           </div>
         </div>
       </main>
+
+      {/* Edit Modal */}
+      <EditLinkModal
+        link={editingLink!}
+        isOpen={!!editingLink}
+        onClose={() => setEditingLink(null)}
+        onSave={handleUpdateLink}
+        isLoading={isUpdating}
+      />
     </div>
   );
 };
