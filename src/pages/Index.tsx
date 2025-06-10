@@ -361,7 +361,7 @@ const Index = () => {
 
       {/* Edit Modal */}
       <EditLinkModal
-        link={editingLink!}
+        link={editingLink}
         isOpen={!!editingLink}
         onClose={() => setEditingLink(null)}
         onSave={handleUpdateLink}

@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { MeetLink, UpdateMeetLinkData } from '@/services/meetLinksService';
 
 interface EditLinkModalProps {
-  link: MeetLink;
+  link: MeetLink | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (id: string, updates: UpdateMeetLinkData) => Promise<void>;
@@ -19,11 +19,22 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
   isLoading
 }) => {
   const [formData, setFormData] = useState({
-    url: link.url,
-    name: link.name,
-    notes: link.notes || ''
+    url: link?.url || '',
+    name: link?.name || '',
+    notes: link?.notes || ''
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Reset form data when link changes
+  React.useEffect(() => {
+    if (link) {
+      setFormData({
+        url: link.url,
+        name: link.name,
+        notes: link.notes || ''
+      });
+    }
+  }, [link]);
 
   const validateGoogleMeetUrl = (url: string): boolean => {
     const meetUrlPattern = /^https:\/\/meet\.google\.com\/[a-z-]+$/;
@@ -67,7 +78,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!link || !validateForm()) return;
 
     try {
       await onSave(link.id, {
@@ -82,7 +93,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !link) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
