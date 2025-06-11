@@ -19,6 +19,7 @@ export type Database = {
           notes: string | null
           updated_at: string
           url: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -29,6 +30,7 @@ export type Database = {
           notes?: string | null
           updated_at?: string
           url: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -39,6 +41,74 @@ export type Database = {
           notes?: string | null
           updated_at?: string
           url?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meet_links_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          session_token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          id: string
+          last_login: string | null
+          password_clicks: Json
+          session_expires_at: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_login?: string | null
+          password_clicks?: Json
+          session_expires_at?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_login?: string | null
+          password_clicks?: Json
+          session_expires_at?: string | null
+          username?: string
         }
         Relationships: []
       }
