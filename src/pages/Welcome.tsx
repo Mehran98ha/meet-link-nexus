@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Video } from 'lucide-react';
+import { ArrowRight, Video, Calendar, Bookmark, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -41,7 +41,7 @@ const Welcome = () => {
           <Card className="p-4 border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow transition-all duration-300 rounded-xl">
             <div className="flex items-start gap-4">
               <div className="rounded-full bg-purple-100 p-2 flex-shrink-0">
-                <BookmarkPlus className="h-5 w-5 text-purple-600" />
+                <Bookmark className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">Save Important Links</h3>
@@ -53,7 +53,7 @@ const Welcome = () => {
           <Card className="p-4 border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow transition-all duration-300 rounded-xl">
             <div className="flex items-start gap-4">
               <div className="rounded-full bg-indigo-100 p-2 flex-shrink-0">
-                <UserCircle className="h-5 w-5 text-indigo-600" />
+                <User className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">Personalized Profile</h3>
