@@ -9,7 +9,7 @@ interface VisualPasswordImageProps {
   isSetup?: boolean;
 }
 
-const IMAGE_URL = "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c66ef454-b55c-44c0-bd64-85e7229ca06a/dikqiqu-0fd5f0b5-8ccd-4541-84e0-81dad4d68fb4.png";
+const IMAGE_URL = "https://cdn.dribbble.com/userupload/43656088/file/original-88b72b9779d6dc4a3ed0c4e377eff16b.png?resize=752x588&vertical=center";
 
 const VisualPasswordImage: React.FC<VisualPasswordImageProps> = ({
   onClicksChange,
