@@ -17,7 +17,7 @@ const Welcome = () => {
             </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 text-transparent bg-clip-text">
-            Meet Link Nexus
+            Meet Link Meetly
           </h1>
           <p className="text-lg text-gray-600">
             Professional video meeting link sharing platform

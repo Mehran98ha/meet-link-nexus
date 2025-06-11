@@ -70,7 +70,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <SheetContent side="left" className="w-64 p-0">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center justify-between p-4 border-b">
-                    <span className="font-bold text-lg">Meet Link Nexus</span>
+                    <span className="font-bold text-lg">Meet Link Meetly</span>
                     <Button variant="ghost" size="icon" onClick={() => setIsSheetOpen(false)}>
                       <X className="h-5 w-5" />
                     </Button>
@@ -104,7 +104,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             {/* Logo */}
             <Link to="/" className="font-semibold text-lg md:text-xl flex items-center">
               <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
-                Meet Link Nexus
+                Meet Link Meetly
               </span>
             </Link>
           </div>

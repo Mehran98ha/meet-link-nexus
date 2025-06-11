@@ -21,7 +21,7 @@ const Auth: React.FC = () => {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-gray-900">
-            Meet Link Nexus
+            Meet Link Meetly
           </CardTitle>
           <p className="text-gray-600 mt-2">
             Secure visual password authentication

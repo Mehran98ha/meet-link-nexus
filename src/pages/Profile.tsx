@@ -157,13 +157,13 @@ const Profile = () => {
                     <Share2 className="h-8 w-8 text-blue-600" />
                   </div>
                   <h3 className="font-medium text-lg">Invite Friends & Colleagues</h3>
-                  <p className="text-gray-500">Share Meet Link Nexus with others</p>
+                  <p className="text-gray-500">Share Meet Link Meetly with others</p>
                   
                   <div className="max-w-md mx-auto mt-4">
                     <div className="flex items-center border rounded-md overflow-hidden">
                       <input 
                         type="text" 
-                        value="https://meet-link-nexus.com/invite/xyz123" 
+                        value="https://meet-link-Meetly.com/invite/xyz123" 
                         readOnly
                         className="flex-1 px-4 py-2 bg-gray-50 text-sm focus:outline-none"
                       />

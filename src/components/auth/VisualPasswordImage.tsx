@@ -60,7 +60,7 @@ const VisualPasswordImage: React.FC<VisualPasswordImageProps> = ({
           ref={imageRef}
           src={IMAGE_URL}
           alt="Visual Password"
-          className="w-full h-auto cursor-crosshair select-none"
+          className="w-full h-auto cursor-pointer select-none"
           onLoad={() => setImageLoaded(true)}
           onClick={handleImageClick}
           onDragStart={(e) => e.preventDefault()}
