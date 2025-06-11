@@ -1,7 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { MeetLink, UpdateMeetLinkData } from '@/services/meetLinksService';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface EditLinkModalProps {
   link: MeetLink | null;
@@ -26,7 +28,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Reset form data when link changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (link) {
       setFormData({
         url: link.url,
@@ -96,17 +98,19 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
   if (!isOpen || !link) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 animate-fade-in">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-foreground">Edit Meeting Link</h2>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
             disabled={isLoading}
-            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X size={20} />
-          </button>
+            <span className="sr-only">Close</span>
+          </Button>
         </div>
 
         <div className="p-6 space-y-4">
@@ -114,16 +118,14 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
             <label className="block text-sm font-medium text-foreground mb-2">
               Google Meet URL *
             </label>
-            <input
+            <Input
               type="url"
               name="url"
               value={formData.url}
               onChange={handleInputChange}
               disabled={isLoading}
               placeholder="https://meet.google.com/xxx-xxxx-xxx"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
-                errors.url ? 'border-red-500' : 'border-input'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={errors.url ? "border-red-500" : ""}
             />
             {errors.url && <p className="text-red-500 text-sm mt-1">{errors.url}</p>}
           </div>
@@ -132,16 +134,14 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
             <label className="block text-sm font-medium text-foreground mb-2">
               Meeting Name * (50 chars max)
             </label>
-            <input
+            <Input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
               disabled={isLoading}
               placeholder="Enter meeting name"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
-                errors.name ? 'border-red-500' : 'border-input'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={errors.name ? "border-red-500" : ""}
             />
             <div className="flex justify-between mt-1">
               {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
@@ -168,21 +168,21 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 p-6 border-t bg-gray-50">
-          <button
+        <div className="flex justify-end space-x-3 p-6 border-t bg-gray-50 rounded-b-xl">
+          <Button
+            variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground bg-white border border-input rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-blue-600 to-blue-500"
           >
             {isLoading ? 'Saving...' : 'Save Changes'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
