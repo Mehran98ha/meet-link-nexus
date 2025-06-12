@@ -41,7 +41,7 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
       .from('users')
       .insert([{
         username,
-        password_clicks: passwordClicks,
+        password_clicks: passwordClicks as any,
         session_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
       }])
       .select()
