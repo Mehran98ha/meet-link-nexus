@@ -35,14 +35,12 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Authentication Route */}
+              {/* Public Routes */}
+              <Route path="/" element={<Welcome />} />
               <Route path="/auth" element={<Auth />} />
               
-              {/* Welcome/Splash Screen */}
-              <Route path="/welcome" element={<Welcome />} />
-              
               {/* Protected Routes with AppLayout */}
-              <Route path="/" element={
+              <Route path="/home" element={
                 <ProtectedRoute>
                   <AppLayout>
                     <Home />
@@ -78,9 +76,6 @@ const App = () => {
                 </ProtectedRoute>
               } />
 
-              {/* Redirect legacy routes */}
-              <Route path="/home" element={<Navigate to="/" replace />} />
-              
               {/* 404 Page */}
               <Route path="*" element={<NotFound />} />
             </Routes>

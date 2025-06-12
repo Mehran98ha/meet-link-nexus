@@ -1,11 +1,28 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, Video, Calendar, Bookmark, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Welcome = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show loading spinner while checking auth status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect authenticated users to home
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="w-full max-w-md space-y-8">
@@ -63,14 +80,18 @@ const Welcome = () => {
           </Card>
         </div>
 
-        {/* CTA Button */}
-        <div className="pt-4">
-          <Link to="/home">
+        {/* CTA Buttons */}
+        <div className="pt-4 space-y-3">
+          <Link to="/auth">
             <Button className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300 rounded-xl group">
-              <span>Start Sharing</span>
+              <span>Get Started</span>
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
+          
+          <p className="text-center text-sm text-gray-500">
+            Sign up or log in to start managing your meeting links
+          </p>
         </div>
       </div>
     </div>

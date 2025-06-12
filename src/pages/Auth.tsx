@@ -1,12 +1,29 @@
 
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import VisualPasswordSetup from '@/components/auth/VisualPasswordSetup';
 import VisualPasswordLogin from '@/components/auth/VisualPasswordLogin';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Auth: React.FC = () => {
   const [mode, setMode] = useState<'welcome' | 'login' | 'signup'>('welcome');
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show loading spinner while checking auth status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Redirect authenticated users to home
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
 
   if (mode === 'login') {
     return <VisualPasswordLogin />;

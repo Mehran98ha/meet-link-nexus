@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface User {
@@ -25,12 +24,19 @@ export interface AuthResponse {
  */
 export const registerUser = async (username: string, passwordClicks: PasswordClick[]): Promise<AuthResponse> => {
   try {
+    console.log('Starting user registration for:', username);
+    
     // Check if username already exists
-    const { data: existingUser } = await supabase
+    const { data: existingUser, error: checkError } = await supabase
       .from('users')
       .select('id')
       .eq('username', username)
-      .single();
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error checking existing user:', checkError);
+      return { success: false, error: 'Database connection error. Please try again.' };
+    }
 
     if (existingUser) {
       return { success: false, error: 'Username already exists' };
@@ -48,6 +54,7 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
       .single();
 
     if (userError || !user) {
+      console.error('Error creating user:', userError);
       return { success: false, error: userError?.message || 'Failed to create user' };
     }
 
@@ -62,6 +69,7 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
       }]);
 
     if (sessionError) {
+      console.error('Error creating session:', sessionError);
       return { success: false, error: 'Failed to create session' };
     }
 
@@ -69,6 +77,7 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
     localStorage.setItem('auth_token', sessionToken);
     localStorage.setItem('user_id', user.id);
 
+    console.log('User registration successful:', user.id);
     return { 
       success: true, 
       user: {
@@ -81,7 +90,8 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
     };
 
   } catch (error) {
-    return { success: false, error: 'Registration failed' };
+    console.error('Registration error:', error);
+    return { success: false, error: 'Registration failed. Please check your connection and try again.' };
   }
 };
 
@@ -90,14 +100,21 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
  */
 export const loginUser = async (username: string, passwordClicks: PasswordClick[]): Promise<AuthResponse> => {
   try {
+    console.log('Starting user login for:', username);
+    
     // Get user by username
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
-    if (userError || !user) {
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      return { success: false, error: 'Database connection error. Please try again.' };
+    }
+
+    if (!user) {
       return { success: false, error: 'Invalid username' };
     }
 
@@ -120,7 +137,7 @@ export const loginUser = async (username: string, passwordClicks: PasswordClick[
 
     // Create new session
     const sessionToken = generateSessionToken();
-    await supabase
+    const { error: sessionError } = await supabase
       .from('user_sessions')
       .insert([{
         user_id: user.id,
@@ -128,10 +145,16 @@ export const loginUser = async (username: string, passwordClicks: PasswordClick[
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       }]);
 
+    if (sessionError) {
+      console.error('Error creating session:', sessionError);
+      return { success: false, error: 'Failed to create session' };
+    }
+
     // Store session in localStorage
     localStorage.setItem('auth_token', sessionToken);
     localStorage.setItem('user_id', user.id);
 
+    console.log('User login successful:', user.id);
     return { 
       success: true, 
       user: {
@@ -144,7 +167,8 @@ export const loginUser = async (username: string, passwordClicks: PasswordClick[
     };
 
   } catch (error) {
-    return { success: false, error: 'Login failed' };
+    console.error('Login error:', error);
+    return { success: false, error: 'Login failed. Please check your connection and try again.' };
   }
 };
 
