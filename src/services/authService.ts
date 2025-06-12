@@ -101,8 +101,8 @@ export const loginUser = async (username: string, passwordClicks: PasswordClick[
       return { success: false, error: 'Invalid username' };
     }
 
-    // Verify password clicks
-    const savedClicks = user.password_clicks as PasswordClick[];
+    // Verify password clicks - properly cast from Json to PasswordClick[]
+    const savedClicks = user.password_clicks as unknown as PasswordClick[];
     const isValid = verifyPasswordClicks(passwordClicks, savedClicks);
 
     if (!isValid) {
