@@ -1,16 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useMeetings } from '@/hooks/useMeetings';
-import { filterLinks, formatRelativeTime } from '@/utils/meetingUtils';
-import { CreateMeetLinkData } from '@/services/meetLinksService';
-import EditLinkModal from '@/components/EditLinkModal';
-
-// Component imports
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import MeetingCard from '@/components/meetings/MeetingCard';
 import MeetingForm from '@/components/meetings/MeetingForm';
 import MeetingFilters from '@/components/meetings/MeetingFilters';
@@ -18,175 +10,121 @@ import MeetingTabs from '@/components/meetings/MeetingTabs';
 import EmptyState from '@/components/meetings/EmptyState';
 import AuthPromptDialog from '@/components/meetings/AuthPromptDialog';
 import LoadingSkeleton from '@/components/meetings/LoadingSkeleton';
+import { useMeetings } from '@/hooks/useMeetings';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-const Home = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [editingLink, setEditingLink] = useState(null);
+const Home: React.FC = () => {
+  const [showForm, setShowForm] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  
-  const {
-    links,
-    filteredLinks,
-    setFilteredLinks,
-    isLoading,
-    isSubmitting,
-    isUpdating,
-    deletingIds,
-    handleSubmit,
-    handleUpdateLink,
-    handleDelete,
-    checkCanEdit
-  } = useMeetings();
+  const { t, isRTL } = useLanguage();
+  const { meetings, isLoading, createMeeting, deleteMeeting, updateMeeting } = useMeetings();
 
-  // Filter links when searchTerm or activeTab changes
-  useEffect(() => {
-    const filtered = filterLinks(links, searchTerm, activeTab, isAuthenticated);
-    setFilteredLinks(filtered);
-  }, [searchTerm, activeTab, links, isAuthenticated, setFilteredLinks]);
-
-  const handleAddLinkClick = () => {
+  const handleAddMeeting = () => {
     if (!isAuthenticated) {
       setShowAuthPrompt(true);
       return;
     }
+    setShowForm(true);
   };
 
-  const handleFormSubmit = async (e?: React.FormEvent, closeDrawer?: () => void) => {
-    if (e) e.preventDefault();
+  const handleCreateMeeting = async (meetingData: any) => {
+    await createMeeting(meetingData);
+    setShowForm(false);
+  };
+
+  const filteredMeetings = meetings.filter(meeting => {
+    const matchesSearch = meeting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         meeting.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !selectedCategory || meeting.category === selectedCategory;
+    const matchesTab = activeTab === 'all' || 
+                      (activeTab === 'my' && isAuthenticated && meeting.creator_id === 'current-user');
     
-    if (!isAuthenticated) {
-      setShowAuthPrompt(true);
-      return;
-    }
+    return matchesSearch && matchesCategory && matchesTab;
+  });
 
-    // Get form data from the global window object (set by MeetingForm)
-    const formData = (window as any).meetingFormData;
-    if (!formData) return;
-
-    try {
-      const linkData: CreateMeetLinkData = {
-        url: formData.url,
-        name: formData.name,
-        creator: formData.creator,
-        notes: formData.notes
-      };
-
-      await handleSubmit(linkData, closeDrawer);
-      
-      // Clear form
-      if ((window as any).clearMeetingForm) {
-        (window as any).clearMeetingForm();
-      }
-    } catch (error) {
-      // Error handling is done in the hook
-    }
-  };
-
-  const handleEdit = (link: any) => {
-    if (!isAuthenticated) {
-      setShowAuthPrompt(true);
-      return;
-    }
-    setEditingLink(link);
-  };
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
 
   return (
-    <div className="pb-4">
-      {/* Header with search */}
-      <div className="bg-white border-b">
-        <div className="container py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Meeting Links</h1>
-              <p className="text-gray-500">Browse and join available meetings</p>
-            </div>
-            <div className="flex gap-2">
-              <MeetingFilters 
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-              />
-              {isAuthenticated ? (
-                <Drawer>
-                  <DrawerTrigger asChild>
-                    <Button className="bg-gradient-to-r from-blue-600 to-blue-500">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Meeting
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent>
-                    <div className="container max-w-lg mx-auto py-4">
-                      <h3 className="text-xl font-semibold mb-4">Add New Meeting Link</h3>
-                      <MeetingForm 
-                        onSubmit={handleFormSubmit}
-                        isSubmitting={isSubmitting}
-                      />
-                    </div>
-                  </DrawerContent>
-                </Drawer>
-              ) : (
-                <Button 
-                  onClick={handleAddLinkClick}
-                  className="bg-gradient-to-r from-blue-600 to-blue-500"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Meeting
-                </Button>
-              )}
-            </div>
-          </div>
+    <div className={`container mx-auto px-4 py-6 space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+      {/* Header */}
+      <div className={`flex flex-col sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''} justify-between items-start sm:items-center gap-4`}>
+        <div>
+          <h1 className={`text-3xl font-bold ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('home.title')}
+          </h1>
+          <p className={`text-muted-foreground mt-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('home.description')}
+          </p>
         </div>
+        <Button 
+          onClick={handleAddMeeting}
+          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+        >
+          <Plus className="h-4 w-4" />
+          {t('home.addMeeting')}
+        </Button>
       </div>
 
-      {/* Tabs and Content */}
-      <div className="container py-6">
-        <MeetingTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          isAuthenticated={isAuthenticated}
-        >
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : filteredLinks.length === 0 ? (
-            <EmptyState 
-              searchTerm={searchTerm}
-              isAuthenticated={isAuthenticated}
-              onSignUpClick={() => setShowAuthPrompt(true)}
+      {/* Tabs and Filters */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="space-y-4">
+            <MeetingTabs 
+              activeTab={activeTab} 
+              onTabChange={setActiveTab}
+              showMyTab={isAuthenticated}
             />
+            <MeetingFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filteredMeetings.length === 0 ? (
+            <EmptyState onAddMeeting={handleAddMeeting} />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredLinks.map(link => (
+              {filteredMeetings.map((meeting) => (
                 <MeetingCard
-                  key={link.id}
-                  link={link}
-                  canEdit={checkCanEdit(link)}
-                  isDeleting={deletingIds.has(link.id)}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  formatRelativeTime={formatRelativeTime}
+                  key={meeting.id}
+                  meeting={meeting}
+                  onEdit={updateMeeting}
+                  onDelete={deleteMeeting}
+                  showActions={isAuthenticated}
                 />
               ))}
             </div>
           )}
-        </MeetingTabs>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Authentication Prompt Dialog */}
+      {/* Meeting Form Modal */}
+      {showForm && (
+        <MeetingForm
+          onSubmit={handleCreateMeeting}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
+
+      {/* Auth Prompt Dialog */}
       <AuthPromptDialog
-        isOpen={showAuthPrompt}
-        onClose={() => setShowAuthPrompt(false)}
-        onLoginClick={() => navigate('/auth')}
-      />
-
-      {/* Edit Modal */}
-      <EditLinkModal
-        link={editingLink}
-        isOpen={!!editingLink}
-        onClose={() => setEditingLink(null)}
-        onSave={handleUpdateLink}
-        isLoading={isUpdating}
+        open={showAuthPrompt}
+        onOpenChange={setShowAuthPrompt}
       />
     </div>
   );

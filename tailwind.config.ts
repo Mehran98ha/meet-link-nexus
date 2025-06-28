@@ -21,6 +21,7 @@ export default {
 		extend: {
 			fontFamily: {
 				'roboto': ['Roboto', 'sans-serif'],
+				'vazir': ['Vazir', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
