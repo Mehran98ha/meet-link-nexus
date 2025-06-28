@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Clock, ExternalLink, Edit, Trash2, Calendar } from 'lucide-react';
+import { Plus, Search, Filter, Clock, ExternalLink, Edit, Trash2, Calendar, LogIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from '@/components/ui/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { isLocalStorageAvailable, getUserId } from '@/utils/userIdentity';
 import { 
   fetchMeetLinks, 
@@ -28,8 +32,10 @@ const Home = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [editingLink, setEditingLink] = useState<MeetLink | null>(null);
-  const [showStorageWarning, setShowStorageWarning] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     url: '',
     name: '',
@@ -38,15 +44,6 @@ const Home = () => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [activeTab, setActiveTab] = useState('all');
-  
-  // Check localStorage availability on mount
-  useEffect(() => {
-    if (!isLocalStorageAvailable()) {
-      setShowStorageWarning(true);
-    }
-    // Initialize user ID
-    getUserId();
-  }, []);
 
   // Fetch links from database on component mount
   useEffect(() => {
@@ -71,14 +68,14 @@ const Home = () => {
     }
 
     // Apply tab filter
-    if (activeTab === 'mine') {
+    if (activeTab === 'mine' && isAuthenticated) {
       const userId = getUserId();
       filtered = filtered.filter(link => link.creator_id === userId);
     } else if (activeTab === 'recent') {
-      // Sort by created_at and take top 5
+      // Sort by created_at and take top 10
       filtered = [...filtered].sort((a, b) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ).slice(0, 5);
+      ).slice(0, 10);
     }
 
     setFilteredLinks(filtered);
@@ -146,9 +143,22 @@ const Home = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleAddLinkClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    // If authenticated, the drawer will open normally
+  };
+
   const handleSubmit = async (e?: React.FormEvent, closeDrawer?: () => void) => {
     if (e) e.preventDefault();
     if (!validateForm()) return;
+
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -187,6 +197,10 @@ const Home = () => {
   };
 
   const handleEdit = (link: MeetLink) => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
     setEditingLink(link);
   };
 
@@ -212,13 +226,18 @@ const Home = () => {
         description: error instanceof Error ? error.message : "Failed to update meeting link.",
         variant: "destructive"
       });
-      throw error; // Re-throw to prevent modal from closing
+      throw error;
     } finally {
       setIsUpdating(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this meeting link? This action cannot be undone.')) {
       return;
     }
@@ -251,7 +270,7 @@ const Home = () => {
     }
   };
 
-  // Format date to relative time (e.g., "2 days ago")
+  // Format date to relative time
   const formatRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -265,20 +284,20 @@ const Home = () => {
   };
 
   return (
-    <div className="pb-20 md:pb-0">
+    <div className="pb-4">
       {/* Header with search */}
       <div className="bg-white border-b">
         <div className="container py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-500">Browse and manage your meeting links</p>
+              <h1 className="text-2xl font-bold text-gray-900">Meeting Links</h1>
+              <p className="text-gray-500">Browse and join available meetings</p>
             </div>
             <div className="flex gap-2">
               <div className="relative flex-grow md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input 
-                  placeholder="Search links..." 
+                  placeholder="Search meetings..." 
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="pl-9 pr-4 w-full"
@@ -287,93 +306,103 @@ const Home = () => {
               <Button variant="outline" size="icon">
                 <Filter className="h-4 w-4" />
               </Button>
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button className="bg-gradient-to-r from-blue-600 to-blue-500">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Link
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <div className="container max-w-lg mx-auto py-4">
-                    <h3 className="text-xl font-semibold mb-4">Add New Meeting Link</h3>
-                    <form onSubmit={e => handleSubmit(e, () => document.querySelector<HTMLButtonElement>('[data-drawer-close]')?.click())}>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <label htmlFor="url" className="text-sm font-medium">
-                            Google Meet URL *
-                          </label>
-                          <Input
-                            id="url"
-                            name="url"
-                            placeholder="https://meet.google.com/xxx-xxxx-xxx"
-                            value={formData.url}
-                            onChange={handleInputChange}
-                            className={errors.url ? "border-red-500" : ""}
-                          />
-                          {errors.url && <p className="text-red-500 text-xs">{errors.url}</p>}
+              {isAuthenticated ? (
+                <Drawer>
+                  <DrawerTrigger asChild>
+                    <Button className="bg-gradient-to-r from-blue-600 to-blue-500">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Meeting
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent>
+                    <div className="container max-w-lg mx-auto py-4">
+                      <h3 className="text-xl font-semibold mb-4">Add New Meeting Link</h3>
+                      <form onSubmit={e => handleSubmit(e, () => document.querySelector<HTMLButtonElement>('[data-drawer-close]')?.click())}>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid gap-2">
+                            <label htmlFor="url" className="text-sm font-medium">
+                              Google Meet URL *
+                            </label>
+                            <Input
+                              id="url"
+                              name="url"
+                              placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                              value={formData.url}
+                              onChange={handleInputChange}
+                              className={errors.url ? "border-red-500" : ""}
+                            />
+                            {errors.url && <p className="text-red-500 text-xs">{errors.url}</p>}
+                          </div>
+                          <div className="grid gap-2">
+                            <label htmlFor="name" className="text-sm font-medium">
+                              Meeting Name * (50 chars max)
+                            </label>
+                            <Input
+                              id="name"
+                              name="name"
+                              placeholder="Weekly Team Sync"
+                              value={formData.name}
+                              onChange={handleInputChange}
+                              className={errors.name ? "border-red-500" : ""}
+                            />
+                            {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
+                            <p className="text-xs text-gray-500 text-right">{formData.name.length}/50</p>
+                          </div>
+                          <div className="grid gap-2">
+                            <label htmlFor="creator" className="text-sm font-medium">
+                              Your Name *
+                            </label>
+                            <Input
+                              id="creator"
+                              name="creator"
+                              placeholder="John Doe"
+                              value={formData.creator}
+                              onChange={handleInputChange}
+                              className={errors.creator ? "border-red-500" : ""}
+                            />
+                            {errors.creator && <p className="text-red-500 text-xs">{errors.creator}</p>}
+                          </div>
+                          <div className="grid gap-2">
+                            <label htmlFor="notes" className="text-sm font-medium">
+                              Notes (500 chars max)
+                            </label>
+                            <textarea
+                              id="notes"
+                              name="notes"
+                              placeholder="Optional meeting details..."
+                              value={formData.notes}
+                              onChange={handleInputChange}
+                              rows={3}
+                              className="w-full rounded-md border border-input px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            />
+                            <p className="text-xs text-gray-500 text-right">{formData.notes.length}/500</p>
+                          </div>
                         </div>
-                        <div className="grid gap-2">
-                          <label htmlFor="name" className="text-sm font-medium">
-                            Meeting Name * (50 chars max)
-                          </label>
-                          <Input
-                            id="name"
-                            name="name"
-                            placeholder="Weekly Team Sync"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            className={errors.name ? "border-red-500" : ""}
-                          />
-                          {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
-                          <p className="text-xs text-gray-500 text-right">{formData.name.length}/50</p>
+                        <div className="flex justify-end gap-2 mt-4">
+                          <DrawerClose asChild>
+                            <Button variant="outline" type="button">Cancel</Button>
+                          </DrawerClose>
+                          <Button
+                            type="submit"
+                            className="bg-gradient-to-r from-blue-600 to-blue-500"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? "Adding..." : "Add Meeting Link"}
+                          </Button>
                         </div>
-                        <div className="grid gap-2">
-                          <label htmlFor="creator" className="text-sm font-medium">
-                            Your Name *
-                          </label>
-                          <Input
-                            id="creator"
-                            name="creator"
-                            placeholder="John Doe"
-                            value={formData.creator}
-                            onChange={handleInputChange}
-                            className={errors.creator ? "border-red-500" : ""}
-                          />
-                          {errors.creator && <p className="text-red-500 text-xs">{errors.creator}</p>}
-                        </div>
-                        <div className="grid gap-2">
-                          <label htmlFor="notes" className="text-sm font-medium">
-                            Notes (500 chars max)
-                          </label>
-                          <textarea
-                            id="notes"
-                            name="notes"
-                            placeholder="Optional meeting details..."
-                            value={formData.notes}
-                            onChange={handleInputChange}
-                            rows={3}
-                            className="w-full rounded-md border border-input px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                          />
-                          <p className="text-xs text-gray-500 text-right">{formData.notes.length}/500</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2 mt-4">
-                        <DrawerClose asChild>
-                          <Button variant="outline" type="button">Cancel</Button>
-                        </DrawerClose>
-                        <Button
-                          type="submit"
-                          className="bg-gradient-to-r from-blue-600 to-blue-500"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? "Adding..." : "Add Meeting Link"}
-                        </Button>
-                      </div>
-                    </form>
-                  </div>
-                </DrawerContent>
-              </Drawer>
+                      </form>
+                    </div>
+                  </DrawerContent>
+                </Drawer>
+              ) : (
+                <Button 
+                  onClick={handleAddLinkClick}
+                  className="bg-gradient-to-r from-blue-600 to-blue-500"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Meeting
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -387,14 +416,16 @@ const Home = () => {
               value="all" 
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
             >
-              All Links
+              All Meetings
             </TabsTrigger>
-            <TabsTrigger 
-              value="mine" 
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
-            >
-              My Links
-            </TabsTrigger>
+            {isAuthenticated && (
+              <TabsTrigger 
+                value="mine" 
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
+              >
+                My Meetings
+              </TabsTrigger>
+            )}
             <TabsTrigger 
               value="recent" 
               className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all duration-200"
@@ -406,8 +437,8 @@ const Home = () => {
           <TabsContent value={activeTab} className="mt-6">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="bg-white border-gray-100 shadow-sm hover:shadow transition-all duration-300 animate-pulse">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="bg-white border-gray-100 shadow-sm animate-pulse">
                     <CardHeader className="pb-2">
                       <div className="h-6 bg-gray-200 rounded-md w-3/4 mb-2"></div>
                       <div className="h-4 bg-gray-200 rounded-md w-1/2"></div>
@@ -428,23 +459,18 @@ const Home = () => {
                 <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gray-100 mb-4">
                   <Calendar className="h-8 w-8 text-gray-400" />
                 </div>
-                <h3 className="font-medium text-gray-900 text-lg">No meeting links found</h3>
+                <h3 className="font-medium text-gray-900 text-lg">No meetings found</h3>
                 <p className="text-gray-500 mt-2 mb-6">
                   {searchTerm 
                     ? "Try a different search term or clear your filters" 
-                    : "Add your first meeting link to get started"}
+                    : "Be the first to share a meeting link!"}
                 </p>
-                <Drawer>
-                  <DrawerTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Link
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent>
-                    {/* Form content - same as above */}
-                  </DrawerContent>
-                </Drawer>
+                {!isAuthenticated && (
+                  <Button onClick={() => setShowAuthPrompt(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Sign up to add meetings
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -472,7 +498,7 @@ const Home = () => {
                     </CardContent>
                     <CardFooter className="flex justify-between border-t pt-4">
                       <div className="flex gap-2">
-                        {canEditLink(link) && (
+                        {isAuthenticated && canEditLink(link) && (
                           <>
                             <Button 
                               variant="ghost" 
@@ -511,6 +537,29 @@ const Home = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Authentication Prompt Dialog */}
+      <Dialog open={showAuthPrompt} onOpenChange={setShowAuthPrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 mb-4">
+              You need to be logged in to add, edit, or delete meeting links.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowAuthPrompt(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => navigate('/auth')}>
+                <LogIn className="h-4 w-4 mr-2" />
+                Login / Sign Up
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Modal */}
       <EditLinkModal

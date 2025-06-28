@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Home, UserCircle, BookmarkPlus, Calendar, List, Menu, X } from 'lucide-react';
+import { Home, UserCircle, BookmarkPlus, Calendar, List, Menu, X, Video, LogOut } from 'lucide-react';
 import { 
   Sheet, 
   SheetContent, 
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -17,10 +18,11 @@ interface AppLayoutProps {
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const navigationItems = [
     { 
-      name: "Home", 
+      name: "Browse Meetings", 
       path: "/", 
       icon: <Home className="h-5 w-5" /> 
     },
@@ -51,6 +53,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       return location.pathname === path;
     }
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setIsSheetOpen(false);
   };
 
   return (
@@ -95,6 +102,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                           <span className="font-medium">{item.name}</span>
                         </Link>
                       ))}
+                      <Button
+                        variant="ghost"
+                        onClick={handleLogout}
+                        className="justify-start px-3 py-2 h-auto mt-4 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <LogOut className="h-5 w-5 mr-3" />
+                        <span className="font-medium">Logout</span>
+                      </Button>
                     </nav>
                   </div>
                 </div>
@@ -102,18 +117,24 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </Sheet>
 
             {/* Logo */}
-            <Link to="/" className="font-semibold text-lg md:text-xl flex items-center">
+            <Link to="/" className="font-semibold text-lg md:text-xl flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-r from-blue-600 to-blue-400 rounded-lg">
+                <Video className="h-5 w-5 text-white" />
+              </div>
               <span className="bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
                 Meet Link Meetly
               </span>
             </Link>
           </div>
 
-          {/* User Menu - Placeholder */}
+          {/* User Menu */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <UserCircle className="h-4 w-4 mr-2" />
-              Account
+            <span className="hidden md:block text-sm text-gray-600">
+              Welcome, {user?.username}
+            </span>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>
@@ -175,7 +196,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 "text-xs", 
                 isActivePath(item.path) ? "text-blue-600 font-medium" : "text-gray-600"
               )}>
-                {item.name}
+                {item.name.split(' ')[0]}
               </span>
             </Link>
           ))}

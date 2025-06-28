@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { ArrowRight, Video, Calendar, Bookmark, User } from 'lucide-react';
+import { ArrowRight, Video, Calendar, Bookmark, User, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,9 +18,9 @@ const Welcome = () => {
     );
   }
 
-  // Redirect authenticated users to home
+  // Redirect authenticated users to main page
   if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (
@@ -34,10 +34,10 @@ const Welcome = () => {
             </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 text-transparent bg-clip-text">
-            Meet Link Meetly
+            Welcome to Meet Link Meetly
           </h1>
           <p className="text-lg text-gray-600">
-            Professional video meeting link sharing platform
+            Discover and share meeting links with the community
           </p>
         </div>
 
@@ -46,11 +46,11 @@ const Welcome = () => {
           <Card className="p-4 border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow transition-all duration-300 rounded-xl">
             <div className="flex items-start gap-4">
               <div className="rounded-full bg-blue-100 p-2 flex-shrink-0">
-                <Calendar className="h-5 w-5 text-blue-600" />
+                <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Organize Meetings</h3>
-                <p className="text-gray-500 text-sm">Create and share your Google Meet links with one click</p>
+                <h3 className="font-medium text-gray-900">Browse Public Meetings</h3>
+                <p className="text-gray-500 text-sm">View all shared meeting links without creating an account</p>
               </div>
             </div>
           </Card>
@@ -58,11 +58,11 @@ const Welcome = () => {
           <Card className="p-4 border border-gray-100 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow transition-all duration-300 rounded-xl">
             <div className="flex items-start gap-4">
               <div className="rounded-full bg-purple-100 p-2 flex-shrink-0">
-                <Bookmark className="h-5 w-5 text-purple-600" />
+                <Calendar className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Save Important Links</h3>
-                <p className="text-gray-500 text-sm">Bookmark recurring meetings for quick access</p>
+                <h3 className="font-medium text-gray-900">Share Your Meetings</h3>
+                <p className="text-gray-500 text-sm">Sign up to add your own Google Meet links</p>
               </div>
             </div>
           </Card>
@@ -73,8 +73,8 @@ const Welcome = () => {
                 <User className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Personalized Profile</h3>
-                <p className="text-gray-500 text-sm">Manage your links and meeting preferences</p>
+                <h3 className="font-medium text-gray-900">Manage Your Links</h3>
+                <p className="text-gray-500 text-sm">Edit and organize your meeting links with an account</p>
               </div>
             </div>
           </Card>
@@ -82,15 +82,22 @@ const Welcome = () => {
 
         {/* CTA Buttons */}
         <div className="pt-4 space-y-3">
+          <Link to="/">
+            <Button variant="outline" className="w-full py-6 text-lg shadow-md hover:shadow-lg transition-all duration-300 rounded-xl group">
+              <span>Browse Meetings</span>
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </Link>
+          
           <Link to="/auth">
             <Button className="w-full py-6 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all duration-300 rounded-xl group">
-              <span>Get Started</span>
+              <span>Sign Up to Share</span>
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
           
           <p className="text-center text-sm text-gray-500">
-            Sign up or log in to start managing your meeting links
+            No account needed to browse • Sign up to share your own meetings
           </p>
         </div>
       </div>

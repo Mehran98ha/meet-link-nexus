@@ -15,6 +15,7 @@ import Join from "./pages/Join";
 import Saved from "./pages/Saved";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import PublicLayout from "./components/layout/PublicLayout";
 import AppLayout from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient({
@@ -36,17 +37,17 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Welcome />} />
+              <Route path="/welcome" element={<Welcome />} />
               <Route path="/auth" element={<Auth />} />
               
-              {/* Protected Routes with AppLayout */}
-              <Route path="/home" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Home />
-                  </AppLayout>
-                </ProtectedRoute>
+              {/* Main public page - shows meets interface without login requirement */}
+              <Route path="/" element={
+                <PublicLayout>
+                  <Home />
+                </PublicLayout>
               } />
+              
+              {/* Protected Routes with AppLayout */}
               <Route path="/my-links" element={
                 <ProtectedRoute>
                   <AppLayout>

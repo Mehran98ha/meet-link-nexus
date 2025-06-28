@@ -20,9 +20,9 @@ const Auth: React.FC = () => {
     );
   }
 
-  // Redirect authenticated users to home
+  // Redirect authenticated users to main page
   if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (mode === 'login') {
@@ -38,10 +38,10 @@ const Auth: React.FC = () => {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-gray-900">
-            Meet Link Meetly
+            Join Meet Link Meetly
           </CardTitle>
           <p className="text-gray-600 mt-2">
-            Secure visual password authentication
+            Sign up or log in to share your meeting links
           </p>
         </CardHeader>
         
@@ -64,8 +64,10 @@ const Auth: React.FC = () => {
           </Button>
           
           <div className="text-center text-sm text-gray-500 mt-4">
-            <p>New to visual passwords?</p>
-            <p>Create an account to get started!</p>
+            <p>Want to browse meetings without signing up?</p>
+            <a href="/" className="text-blue-600 hover:underline">
+              Browse public meetings
+            </a>
           </div>
         </CardContent>
       </Card>

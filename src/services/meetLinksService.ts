@@ -34,7 +34,7 @@ const getCurrentUserId = (): string | null => {
 };
 
 /**
- * Fetch all meet links
+ * Fetch all meet links (public access)
  */
 export const fetchMeetLinks = async (): Promise<MeetLink[]> => {
   const { data, error } = await supabase
@@ -50,13 +50,13 @@ export const fetchMeetLinks = async (): Promise<MeetLink[]> => {
 };
 
 /**
- * Create a new meet link
+ * Create a new meet link (requires authentication)
  */
 export const createMeetLink = async (linkData: CreateMeetLinkData): Promise<MeetLink> => {
   const userId = getCurrentUserId();
   
   if (!userId) {
-    throw new Error('User not authenticated');
+    throw new Error('Authentication required to create meeting links');
   }
   
   const { data, error } = await supabase
@@ -84,7 +84,7 @@ export const updateMeetLink = async (id: string, updates: UpdateMeetLinkData): P
   const userId = getCurrentUserId();
   
   if (!userId) {
-    throw new Error('User not authenticated');
+    throw new Error('Authentication required to update meeting links');
   }
   
   const { data, error } = await supabase
@@ -112,7 +112,7 @@ export const deleteMeetLink = async (id: string): Promise<void> => {
   const userId = getCurrentUserId();
   
   if (!userId) {
-    throw new Error('User not authenticated');
+    throw new Error('Authentication required to delete meeting links');
   }
   
   const { error } = await supabase
@@ -134,5 +134,5 @@ export const deleteMeetLink = async (id: string): Promise<void> => {
  */
 export const canEditLink = (link: MeetLink): boolean => {
   const currentUserId = getCurrentUserId();
-  return link.user_id === currentUserId || link.creator_id === currentUserId;
+  return currentUserId && (link.user_id === currentUserId || link.creator_id === currentUserId);
 };
