@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -99,68 +100,83 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-primary-50 via-white to-gradient-start/10 p-4 ${isRTL ? 'rtl' : 'ltr'}`}>
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className={`text-center space-y-4 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 via-gradient-middle to-gradient-end bg-clip-text text-transparent">
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Modern Header with Better Typography */}
+        <div className={`text-center space-y-6 py-8 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+          <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-6 h-6 bg-white rounded-lg"></div>
+            </div>
+          </div>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent leading-tight">
             {t('app.name')}
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             {t('app.description')}
           </p>
         </div>
 
-        {/* Tabs */}
-        <MeetingTabs 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange}
-          isAuthenticated={isAuthenticated}
-        />
-
-        {/* Filters */}
-        <MeetingFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-        />
-
-        {/* Content */}
-        {isLoading ? (
-          <LoadingSkeleton />
-        ) : filteredLinks.length === 0 ? (
-          <EmptyState 
-            searchTerm={searchTerm}
-            onAddMeeting={handleAddMeeting}
+        {/* Enhanced Tabs with Modern Design */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-white/20">
+          <MeetingTabs 
+            activeTab={activeTab} 
+            onTabChange={handleTabChange}
             isAuthenticated={isAuthenticated}
           />
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredLinks.map((link) => (
-              <MeetingCard
-                key={link.id}
-                link={link}
-                onEdit={handleEditLink}
-                onDelete={handleDelete}
-                showActions={checkCanEdit(link)}
+        </div>
+
+        {/* Improved Filters */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+          <MeetingFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
+        </div>
+
+        {/* Content Area */}
+        <div className="min-h-[400px]">
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : filteredLinks.length === 0 ? (
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-12 shadow-lg border border-white/20">
+              <EmptyState 
+                searchTerm={searchTerm}
                 onAddMeeting={handleAddMeeting}
+                isAuthenticated={isAuthenticated}
               />
-            ))}
-          </div>
-        )}
+            </div>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {filteredLinks.map((link) => (
+                <MeetingCard
+                  key={link.id}
+                  link={link}
+                  onEdit={handleEditLink}
+                  onDelete={handleDelete}
+                  showActions={checkCanEdit(link)}
+                  onAddMeeting={handleAddMeeting}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Add Meeting Form Drawer */}
+      {/* Enhanced Drawer with Better Styling */}
       <Drawer open={showForm} onOpenChange={setShowForm}>
-        <DrawerContent className="max-w-2xl mx-auto">
-          <DrawerHeader>
-            <DrawerTitle className={isRTL ? 'font-vazirmatn text-right' : 'font-urbanist text-left'}>
+        <DrawerContent className="max-w-3xl mx-auto bg-white rounded-t-3xl border-0 shadow-2xl">
+          <DrawerHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-3xl border-b border-gray-100">
+            <DrawerTitle className={`text-2xl font-bold text-gray-900 ${isRTL ? 'font-vazirmatn text-right' : 'font-urbanist text-left'}`}>
               {t('meetings.addNew')}
             </DrawerTitle>
           </DrawerHeader>
-          <MeetingForm
-            onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
-          />
+          <div className="p-6">
+            <MeetingForm
+              onSubmit={handleFormSubmit}
+              isSubmitting={isSubmitting}
+            />
+          </div>
         </DrawerContent>
       </Drawer>
 

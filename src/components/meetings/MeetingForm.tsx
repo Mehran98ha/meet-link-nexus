@@ -78,43 +78,71 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => 
   };
 
   return (
-    <form onSubmit={handleSubmit} className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}>
-      <div className="grid gap-4 py-4">
-        <div className="grid gap-2">
-          <label htmlFor="url" className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-8">
+      <form onSubmit={handleSubmit} className={`space-y-6 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+        {/* URL Input Group */}
+        <div className="space-y-3">
+          <label htmlFor="url" className={`block text-lg font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('meetings.googleMeetUrl')} *
           </label>
-          <Input
-            id="url"
-            name="url"
-            placeholder="https://meet.google.com/xxx-xxxx-xxx"
-            value={formData.url}
-            onChange={handleInputChange}
-            className={errors.url ? "border-red-500" : ""}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          />
-          {errors.url && <p className={`text-red-500 text-xs ${isRTL ? 'text-right' : 'text-left'}`}>{errors.url}</p>}
+          <div className="relative">
+            <Input
+              id="url"
+              name="url"
+              placeholder="https://meet.google.com/xxx-xxxx-xxx"
+              value={formData.url}
+              onChange={handleInputChange}
+              className={`h-14 text-lg rounded-xl border-2 bg-white shadow-sm focus:shadow-lg transition-all duration-200 ${
+                errors.url 
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-200" 
+                  : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+              }`}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+          </div>
+          {errors.url && (
+            <p className={`text-red-600 text-sm font-medium bg-red-50 px-4 py-2 rounded-xl ${isRTL ? 'text-right' : 'text-left'}`}>
+              {errors.url}
+            </p>
+          )}
         </div>
         
-        <div className="grid gap-2">
-          <label htmlFor="name" className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
-            {t('meetings.meetingName')} * (50 {t('meetings.maxChars')})
+        {/* Name Input Group */}
+        <div className="space-y-3">
+          <label htmlFor="name" className={`block text-lg font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('meetings.meetingName')} * 
+            <span className="text-sm font-normal text-gray-600 ml-2">
+              (50 {t('meetings.maxChars')})
+            </span>
           </label>
-          <Input
-            id="name"
-            name="name"
-            placeholder={isRTL ? 'جلسه هفتگی تیم' : 'Weekly Team Sync'}
-            value={formData.name}
-            onChange={handleInputChange}
-            className={errors.name ? "border-red-500" : ""}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          />
-          {errors.name && <p className={`text-red-500 text-xs ${isRTL ? 'text-right' : 'text-left'}`}>{errors.name}</p>}
-          <p className={`text-xs text-gray-500 ${isRTL ? 'text-left' : 'text-right'}`}>{formData.name.length}/50</p>
+          <div className="relative">
+            <Input
+              id="name"
+              name="name"
+              placeholder={isRTL ? 'جلسه هفتگی تیم' : 'Weekly Team Sync'}
+              value={formData.name}
+              onChange={handleInputChange}
+              className={`h-14 text-lg rounded-xl border-2 bg-white shadow-sm focus:shadow-lg transition-all duration-200 ${
+                errors.name 
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-200" 
+                  : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+              }`}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+            <div className={`absolute top-4 text-sm text-gray-500 bg-white px-2 rounded-lg ${isRTL ? 'left-4' : 'right-4'}`}>
+              {formData.name.length}/50
+            </div>
+          </div>
+          {errors.name && (
+            <p className={`text-red-600 text-sm font-medium bg-red-50 px-4 py-2 rounded-xl ${isRTL ? 'text-right' : 'text-left'}`}>
+              {errors.name}
+            </p>
+          )}
         </div>
         
-        <div className="grid gap-2">
-          <label htmlFor="creator" className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+        {/* Creator Input Group */}
+        <div className="space-y-3">
+          <label htmlFor="creator" className={`block text-lg font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('meetings.yourName')} *
           </label>
           <Input
@@ -123,45 +151,73 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => 
             placeholder={isRTL ? 'محمد احمدی' : 'John Doe'}
             value={formData.creator}
             onChange={handleInputChange}
-            className={errors.creator ? "border-red-500" : ""}
+            className={`h-14 text-lg rounded-xl border-2 bg-white shadow-sm focus:shadow-lg transition-all duration-200 ${
+              errors.creator 
+                ? "border-red-400 focus:border-red-500 focus:ring-red-200" 
+                : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+            }`}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
-          {errors.creator && <p className={`text-red-500 text-xs ${isRTL ? 'text-right' : 'text-left'}`}>{errors.creator}</p>}
+          {errors.creator && (
+            <p className={`text-red-600 text-sm font-medium bg-red-50 px-4 py-2 rounded-xl ${isRTL ? 'text-right' : 'text-left'}`}>
+              {errors.creator}
+            </p>
+          )}
         </div>
         
-        <div className="grid gap-2">
-          <label htmlFor="notes" className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
-            {t('meetings.notes')} (500 {t('meetings.maxChars')})
+        {/* Notes Input Group */}
+        <div className="space-y-3">
+          <label htmlFor="notes" className={`block text-lg font-semibold text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('meetings.notes')} 
+            <span className="text-sm font-normal text-gray-600 ml-2">
+              (500 {t('meetings.maxChars')})
+            </span>
           </label>
-          <textarea
-            id="notes"
-            name="notes"
-            placeholder={t('meetings.optionalNotes')}
-            value={formData.notes}
-            onChange={handleInputChange}
-            rows={3}
-            className="w-full rounded-md border border-input px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            dir={isRTL ? 'rtl' : 'ltr'}
-          />
-          <p className={`text-xs text-gray-500 ${isRTL ? 'text-left' : 'text-right'}`}>{formData.notes.length}/500</p>
+          <div className="relative">
+            <textarea
+              id="notes"
+              name="notes"
+              placeholder={t('meetings.optionalNotes')}
+              value={formData.notes}
+              onChange={handleInputChange}
+              rows={4}
+              className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-4 text-lg shadow-sm focus:border-blue-500 focus:ring-blue-200 focus:shadow-lg transition-all duration-200 resize-none"
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+            <div className={`absolute bottom-4 text-sm text-gray-500 bg-white px-2 rounded-lg ${isRTL ? 'left-4' : 'right-4'}`}>
+              {formData.notes.length}/500
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div className={`flex gap-2 mt-4 ${isRTL ? 'flex-row-reverse justify-start' : 'justify-end'}`}>
-        <DrawerClose asChild>
-          <Button variant="outline" type="button" className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}>
-            {t('common.cancel')}
+        
+        {/* Action Buttons */}
+        <div className={`flex gap-4 pt-6 ${isRTL ? 'flex-row-reverse justify-start' : 'justify-end'}`}>
+          <DrawerClose asChild>
+            <Button 
+              variant="outline" 
+              type="button" 
+              className={`h-14 px-8 text-lg font-semibold rounded-xl border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-all duration-200 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
+            >
+              {t('common.cancel')}
+            </Button>
+          </DrawerClose>
+          <Button
+            type="submit"
+            className={`h-14 px-8 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                {t('meetings.adding')}
+              </div>
+            ) : (
+              t('meetings.addMeetingLink')
+            )}
           </Button>
-        </DrawerClose>
-        <Button
-          type="submit"
-          className={`bg-gradient-to-r from-blue-600 to-blue-500 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? t('meetings.adding') : t('meetings.addMeetingLink')}
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
+    </div>
   );
 };
 
