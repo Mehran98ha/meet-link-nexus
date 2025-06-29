@@ -92,7 +92,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-urbanist;
+    @apply bg-background text-foreground font-vazirmatn;
   }
 
   /* RTL Support */
@@ -184,6 +184,12 @@
 
   .ltr {
     direction: ltr;
+  }
+
+  /* Sidebar RTL support */
+  .sidebar-rtl {
+    right: 0;
+    left: auto;
   }
 
   /* Smooth transitions */

@@ -76,15 +76,18 @@ const AppSidebar: React.FC = () => {
   );
 
   return (
-    <Sidebar className={`${collapsed ? 'w-16' : 'w-64'} transition-all duration-200`}>
+    <Sidebar 
+      className={`${collapsed ? 'w-16' : 'w-64'} transition-all duration-200 ${isRTL ? 'sidebar-rtl' : ''}`}
+      side={isRTL ? 'right' : 'left'}
+    >
       <SidebarHeader className="p-4">
-        <Link to="/" className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''}`}>
+        <Link to="/" className={`flex items-center gap-2 ${collapsed ? 'justify-center' : ''} ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="p-2 bg-gradient-to-r from-blue-600 to-blue-400 rounded-lg shrink-0">
             <Video className="h-5 w-5 text-white" />
           </div>
           {!collapsed && (
-            <span className={`text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text ${isRTL ? 'text-right' : 'text-left'}`}>
-              {t('app.title')}
+            <span className={`text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text ${isRTL ? 'text-right font-vazirmatn' : 'text-left font-urbanist'}`}>
+              {t('app.name')}
             </span>
           )}
         </Link>
@@ -100,9 +103,9 @@ const AppSidebar: React.FC = () => {
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton asChild isActive={isActive(item.path)}>
-                    <Link to={item.path} className="flex items-center gap-3">
+                    <Link to={item.path} className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <item.icon className="h-5 w-5 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}>{item.title}</span>}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -121,7 +124,7 @@ const AppSidebar: React.FC = () => {
         {isAuthenticated && (
           <div className="space-y-2">
             {!collapsed && user && (
-              <div className={`text-sm text-muted-foreground ${isRTL ? 'text-right' : 'text-left'}`}>
+              <div className={`text-sm text-muted-foreground ${isRTL ? 'text-right font-vazirmatn' : 'text-left font-urbanist'}`}>
                 {user.username}
               </div>
             )}
@@ -129,17 +132,17 @@ const AppSidebar: React.FC = () => {
               variant="ghost" 
               size="sm"
               onClick={handleLogout}
-              className={`w-full ${collapsed ? 'px-2' : 'justify-start'}`}
+              className={`w-full ${collapsed ? 'px-2' : isRTL ? 'justify-end' : 'justify-start'} ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <LogOut className="h-4 w-4" />
-              {!collapsed && <span className={isRTL ? 'mr-2' : 'ml-2'}>{t('nav.logout')}</span>}
+              {!collapsed && <span className={isRTL ? 'mr-2 font-vazirmatn' : 'ml-2 font-urbanist'}>{t('nav.logout')}</span>}
             </Button>
           </div>
         )}
         
         {!isAuthenticated && !collapsed && (
           <Link to="/auth">
-            <Button size="sm" className="w-full">
+            <Button size="sm" className={`w-full ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
               {t('nav.login')}
             </Button>
           </Link>
