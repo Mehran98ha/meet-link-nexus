@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* Definition of the design system with vibrant iPhone-inspired colors */
 
 @layer base {
   :root {
@@ -16,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 214 100% 50%;
+    --primary: 247 39% 73%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -33,9 +33,9 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 214 100% 50%;
+    --ring: 247 39% 73%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -57,7 +57,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 214 100% 50%;
+    --primary: 247 39% 73%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -92,7 +92,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-urbanist;
   }
 
   /* RTL Support */
@@ -105,19 +105,76 @@
   }
 
   /* Font Classes */
+  .font-vazirmatn {
+    font-family: 'Vazirmatn', sans-serif;
+  }
+
+  .font-urbanist {
+    font-family: 'Urbanist', sans-serif;
+  }
+
+  /* Backward compatibility */
   .font-vazir {
-    font-family: 'Vazir', sans-serif;
+    font-family: 'Vazirmatn', sans-serif;
   }
 
   .font-roboto {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Urbanist', sans-serif;
+  }
+
+  /* Heading weights */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+  }
+
+  /* Body weight */
+  body, p, span, div {
+    font-weight: 400;
   }
 }
 
-/* Custom animations and transitions */
+/* iPhone-inspired Material Design utilities */
 @layer utilities {
   .animate-fade-in {
     animation: fade-in 0.3s ease-out forwards;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .neumorphic {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    box-shadow: 20px 20px 60px #d1d1d1, -20px -20px 60px #ffffff;
+  }
+
+  .neumorphic-inset {
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    box-shadow: inset 20px 20px 60px #d1d1d1, inset -20px -20px 60px #ffffff;
+  }
+
+  .gradient-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: all 0.3s ease;
+  }
+
+  .gradient-button:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .floating-card {
+    transform: translateY(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .floating-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
 
   /* RTL utilities */
@@ -128,12 +185,45 @@
   .ltr {
     direction: ltr;
   }
+
+  /* Smooth transitions */
+  .smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Drawer animation */
+  .drawer-enter {
+    transform: translateX(-100%);
+  }
+
+  .drawer-enter-active {
+    transform: translateX(0);
+    transition: transform 0.3s ease-out;
+  }
+
+  .drawer-exit {
+    transform: translateX(0);
+  }
+
+  .drawer-exit-active {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in;
+  }
+
+  /* RTL drawer animation */
+  .rtl .drawer-enter {
+    transform: translateX(100%);
+  }
+
+  .rtl .drawer-exit-active {
+    transform: translateX(100%);
+  }
 }
 
-/* Smooth scrollbar styling */
+/* Improved scrollbar styling */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgb(203 213 225) transparent;
+  scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -145,10 +235,63 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgb(203 213 225);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(148 163 184);
+  background: linear-gradient(135deg, #764ba2, #f093fb);
+}
+
+/* Loading animation */
+.loading-dots {
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 10px;
+}
+
+.loading-dots div {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.loading-dots div:nth-child(1) {
+  left: 0;
+  animation: loading-dots1 0.6s infinite;
+}
+
+.loading-dots div:nth-child(2) {
+  left: 8px;
+  animation: loading-dots2 0.6s infinite;
+}
+
+.loading-dots div:nth-child(3) {
+  left: 16px;
+  animation: loading-dots2 0.6s infinite;
+}
+
+.loading-dots div:nth-child(4) {
+  left: 24px;
+  animation: loading-dots3 0.6s infinite;
+}
+
+@keyframes loading-dots1 {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+@keyframes loading-dots3 {
+  0% { transform: scale(1); }
+  100% { transform: scale(0); }
+}
+
+@keyframes loading-dots2 {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(8px, 0); }
 }

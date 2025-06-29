@@ -71,26 +71,26 @@ const Home: React.FC = () => {
   return (
     <div className={`container mx-auto px-4 py-6 space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div className={`flex flex-col sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''} justify-between items-start sm:items-center gap-4`}>
+      <div className={`flex flex-col sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''} justify-between items-start sm:items-center gap-4 animate-fade-in`}>
         <div>
-          <h1 className={`text-3xl font-bold ${isRTL ? 'text-right font-vazir' : 'text-left font-roboto'}`}>
+          <h1 className={`text-3xl font-bold bg-gradient-to-r from-primary-600 to-gradient-middle bg-clip-text text-transparent ${isRTL ? 'text-right font-vazirmatn' : 'text-left font-urbanist'}`}>
             {t('home.title')}
           </h1>
-          <p className={`text-muted-foreground mt-2 ${isRTL ? 'text-right font-vazir' : 'text-left font-roboto'}`}>
+          <p className={`text-muted-foreground mt-2 ${isRTL ? 'text-right font-vazirmatn' : 'text-left font-urbanist'}`}>
             {t('home.description')}
           </p>
         </div>
         <Button 
           onClick={handleAddMeeting}
-          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse font-vazir' : 'font-roboto'}`}
+          className={`gradient-button text-white font-semibold px-6 py-3 rounded-2xl shadow-lg ${isRTL ? 'flex-row-reverse font-vazirmatn' : 'font-urbanist'}`}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-5 w-5 mr-2" />
           {t('home.addMeeting')}
         </Button>
       </div>
 
       {/* Tabs and Filters */}
-      <Card>
+      <Card className="glass-card animate-fade-in">
         <CardHeader className="pb-4">
           <div className="space-y-4">
             <MeetingTabs 
@@ -132,16 +132,22 @@ const Home: React.FC = () => {
 
       {/* Meeting Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-semibold mb-4">Add Meeting Link</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="glass-card rounded-3xl p-6 w-full max-w-md mx-4 animate-fade-in">
+            <h2 className={`text-xl font-bold mb-4 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+              {t('home.addMeeting')}
+            </h2>
             <MeetingForm
               onSubmit={handleCreateMeeting}
               isSubmitting={false}
             />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setShowForm(false)}>
-                Cancel
+            <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} justify-end gap-2 mt-4`}>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowForm(false)}
+                className={`px-6 py-2 rounded-xl ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
+              >
+                {t('common.cancel')}
               </Button>
             </div>
           </div>
@@ -154,7 +160,6 @@ const Home: React.FC = () => {
         onClose={() => setShowAuthPrompt(false)}
         onLoginClick={() => {
           setShowAuthPrompt(false);
-          // Navigate to auth page
           window.location.href = '/auth';
         }}
       />

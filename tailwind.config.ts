@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,8 +19,11 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'roboto': ['Roboto', 'sans-serif'],
-				'vazir': ['Vazir', 'sans-serif'],
+				'urbanist': ['Urbanist', 'sans-serif'],
+				'vazirmatn': ['Vazirmatn', 'sans-serif'],
+				// Keep existing for backward compatibility
+				'roboto': ['Urbanist', 'sans-serif'],
+				'vazir': ['Vazirmatn', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -30,8 +32,13 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#0066FF',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#667eea',
+					foreground: 'hsl(var(--primary-foreground))',
+					50: '#f0f4ff',
+					100: '#e0e7ff',
+					500: '#667eea',
+					600: '#5a67d8',
+					700: '#4c51bf',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -66,6 +73,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				gradient: {
+					start: '#667eea',
+					middle: '#764ba2',
+					end: '#f093fb'
 				}
 			},
 			borderRadius: {
@@ -99,12 +111,52 @@ export default {
 						opacity: '1',
 						transform: 'translateY(0)'
 					}
+				},
+				'slide-in-left': {
+					'0%': {
+						transform: 'translateX(-100%)'
+					},
+					'100%': {
+						transform: 'translateX(0)'
+					}
+				},
+				'slide-in-right': {
+					'0%': {
+						transform: 'translateX(100%)'
+					},
+					'100%': {
+						transform: 'translateX(0)'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-4px)'
+					}
+				},
+				'glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 5px rgba(102, 126, 234, 0.5)'
+					},
+					'50%': {
+						boxShadow: '0 0 20px rgba(102, 126, 234, 0.8)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.3s ease-out'
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-in-left': 'slide-in-left 0.3s ease-out',
+				'slide-in-right': 'slide-in-right 0.3s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite'
+			},
+			backdropFilter: {
+				'none': 'none',
+				'blur': 'blur(20px)',
 			}
 		}
 	},
