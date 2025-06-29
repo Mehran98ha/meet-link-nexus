@@ -19,11 +19,10 @@ const Home: React.FC = () => {
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   const { isAuthenticated } = useAuth();
   const { t, isRTL } = useLanguage();
-  const { meetings, isLoading, createMeeting, deleteMeeting, updateMeeting } = useMeetings();
+  const { links, isLoading, handleSubmit, handleUpdateLink, handleDelete, checkCanEdit } = useMeetings();
 
   const handleAddMeeting = () => {
     if (!isAuthenticated) {
@@ -34,19 +33,32 @@ const Home: React.FC = () => {
   };
 
   const handleCreateMeeting = async (meetingData: any) => {
-    await createMeeting(meetingData);
-    setShowForm(false);
+    try {
+      await handleSubmit(meetingData, () => setShowForm(false));
+    } catch (error) {
+      console.error('Error creating meeting:', error);
+    }
   };
 
-  const filteredMeetings = meetings.filter(meeting => {
-    const matchesSearch = meeting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         meeting.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || meeting.category === selectedCategory;
+  const filteredMeetings = links.filter(meeting => {
+    const matchesSearch = meeting.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         meeting.notes?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTab = activeTab === 'all' || 
-                      (activeTab === 'my' && isAuthenticated && meeting.creator_id === 'current-user');
+                      (activeTab === 'my' && isAuthenticated && checkCanEdit(meeting));
     
-    return matchesSearch && matchesCategory && matchesTab;
+    return matchesSearch && matchesTab;
   });
+
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
 
   if (isLoading) {
     return (
@@ -61,16 +73,16 @@ const Home: React.FC = () => {
       {/* Header */}
       <div className={`flex flex-col sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''} justify-between items-start sm:items-center gap-4`}>
         <div>
-          <h1 className={`text-3xl font-bold ${isRTL ? 'text-right' : 'text-left'}`}>
+          <h1 className={`text-3xl font-bold ${isRTL ? 'text-right font-vazir' : 'text-left font-roboto'}`}>
             {t('home.title')}
           </h1>
-          <p className={`text-muted-foreground mt-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <p className={`text-muted-foreground mt-2 ${isRTL ? 'text-right font-vazir' : 'text-left font-roboto'}`}>
             {t('home.description')}
           </p>
         </div>
         <Button 
           onClick={handleAddMeeting}
-          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+          className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse font-vazir' : 'font-roboto'}`}
         >
           <Plus className="h-4 w-4" />
           {t('home.addMeeting')}
@@ -83,29 +95,34 @@ const Home: React.FC = () => {
           <div className="space-y-4">
             <MeetingTabs 
               activeTab={activeTab} 
-              onTabChange={setActiveTab}
-              showMyTab={isAuthenticated}
-            />
-            <MeetingFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              selectedCategory={selectedCategory}
-              onCategoryChange={setSelectedCategory}
-            />
+              onTabChange={(value: string) => setActiveTab(value as 'all' | 'my')}
+              isAuthenticated={isAuthenticated}
+            >
+              <MeetingFilters
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
+            </MeetingTabs>
           </div>
         </CardHeader>
         <CardContent>
           {filteredMeetings.length === 0 ? (
-            <EmptyState onAddMeeting={handleAddMeeting} />
+            <EmptyState 
+              searchTerm={searchTerm}
+              isAuthenticated={isAuthenticated}
+              onSignUpClick={() => setShowAuthPrompt(true)}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredMeetings.map((meeting) => (
                 <MeetingCard
                   key={meeting.id}
-                  meeting={meeting}
-                  onEdit={updateMeeting}
-                  onDelete={deleteMeeting}
-                  showActions={isAuthenticated}
+                  link={meeting}
+                  canEdit={checkCanEdit(meeting)}
+                  isDeleting={false}
+                  onEdit={(link) => handleUpdateLink(link.id, link)}
+                  onDelete={(id) => handleDelete(id)}
+                  formatRelativeTime={formatRelativeTime}
                 />
               ))}
             </div>
@@ -115,16 +132,31 @@ const Home: React.FC = () => {
 
       {/* Meeting Form Modal */}
       {showForm && (
-        <MeetingForm
-          onSubmit={handleCreateMeeting}
-          onCancel={() => setShowForm(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-semibold mb-4">Add Meeting Link</h2>
+            <MeetingForm
+              onSubmit={handleCreateMeeting}
+              isSubmitting={false}
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowForm(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Auth Prompt Dialog */}
       <AuthPromptDialog
-        open={showAuthPrompt}
-        onOpenChange={setShowAuthPrompt}
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        onLoginClick={() => {
+          setShowAuthPrompt(false);
+          // Navigate to auth page
+          window.location.href = '/auth';
+        }}
       />
     </div>
   );

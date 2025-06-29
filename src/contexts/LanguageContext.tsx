@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type Language = 'en' | 'fa';
+type Language = 'en' | 'fa';
 
 interface LanguageContextType {
   language: Language;
@@ -10,90 +10,52 @@ interface LanguageContextType {
   isRTL: boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
 const translations = {
   en: {
-    // Navigation
-    'nav.browseMeetings': 'Browse Meetings',
-    'nav.myLinks': 'My Links',
-    'nav.joinMeetings': 'Join Meetings',
-    'nav.savedLinks': 'Saved Links',
-    'nav.profile': 'Profile',
-    'nav.logout': 'Logout',
-    'nav.login': 'Login / Sign Up',
-    'nav.myAccount': 'My Account',
-    'app.title': 'Meet Link Meetly',
-    'app.subtitle': 'Share your meeting links with ease.',
-    
-    // Home page
-    'home.title': 'Available Meeting Links',
-    'home.description': 'Find and join active meeting rooms',
-    'home.noMeetings': 'No meetings available',
-    'home.createFirst': 'Create your first meeting link',
-    'home.addMeeting': 'Add Meeting',
-    'home.allMeetings': 'All Meetings',
-    'home.myMeetings': 'My Meetings',
-    
-    // Buttons
-    'button.save': 'Save',
-    'button.cancel': 'Cancel',
-    'button.create': 'Create',
-    'button.edit': 'Edit',
-    'button.delete': 'Delete',
-    'button.join': 'Join',
-    
-    // Form fields
-    'form.title': 'Title',
-    'form.description': 'Description',
-    'form.meetingUrl': 'Meeting URL',
-    'form.category': 'Category',
-    
-    // Language switcher
+    'home.title': 'Meet Link Meetly',
+    'home.description': 'Professional platform for sharing and accessing Google Meet links',
+    'home.addMeeting': 'Add Meeting Link',
+    'search.placeholder': 'Search meetings...',
+    'empty.title': 'No meetings found',
+    'empty.searchMessage': 'Try a different search term or clear your filters',
+    'empty.noMeetings': 'Be the first to share a meeting link!',
+    'empty.signUpButton': 'Sign up to add meetings',
+    'auth.loginRequired': 'Login Required',
+    'auth.loginMessage': 'You need to be logged in to add, edit, or delete meeting links.',
+    'auth.loginSignup': 'Login / Sign Up',
+    'common.cancel': 'Cancel',
     'language.english': 'English',
-    'language.persian': 'فارسی',
+    'language.persian': 'Persian',
+    'nav.home': 'Home',
+    'nav.myLinks': 'My Links',
+    'nav.join': 'Join',
+    'nav.saved': 'Saved',
+    'nav.profile': 'Profile',
   },
   fa: {
-    // Navigation
-    'nav.browseMeetings': 'مرور جلسات',
-    'nav.myLinks': 'لینک‌های من',
-    'nav.joinMeetings': 'پیوستن به جلسات',
-    'nav.savedLinks': 'لینک‌های ذخیره شده',
-    'nav.profile': 'پروفایل',
-    'nav.logout': 'خروج',
-    'nav.login': 'ورود / ثبت نام',
-    'nav.myAccount': 'حساب کاربری من',
-    'app.title': 'میت لینک میتلی',
-    'app.subtitle': 'لینک‌های جلسه خود را به راحتی به اشتراک بگذارید.',
-    
-    // Home page
-    'home.title': 'لینک‌های جلسه موجود',
-    'home.description': 'اتاق‌های جلسه فعال را پیدا کنید و به آن‌ها بپیوندید',
-    'home.noMeetings': 'هیچ جلسه‌ای موجود نیست',
-    'home.createFirst': 'اولین لینک جلسه خود را ایجاد کنید',
-    'home.addMeeting': 'افزودن جلسه',
-    'home.allMeetings': 'تمام جلسات',
-    'home.myMeetings': 'جلسات من',
-    
-    // Buttons
-    'button.save': 'ذخیره',
-    'button.cancel': 'لغو',
-    'button.create': 'ایجاد',
-    'button.edit': 'ویرایش',
-    'button.delete': 'حذف',
-    'button.join': 'پیوستن',
-    
-    // Form fields
-    'form.title': 'عنوان',
-    'form.description': 'توضیحات',
-    'form.meetingUrl': 'لینک جلسه',
-    'form.category': 'دسته‌بندی',
-    
-    // Language switcher
+    'home.title': 'میت لینک میتلی',
+    'home.description': 'پلتفرم حرفه‌ای برای اشتراک‌گذاری و دسترسی به لینک‌های گوگل میت',
+    'home.addMeeting': 'افزودن لینک جلسه',
+    'search.placeholder': 'جستجوی جلسات...',
+    'empty.title': 'هیچ جلسه‌ای یافت نشد',
+    'empty.searchMessage': 'عبارت جستجوی دیگری را امتحان کنید یا فیلترها را پاک کنید',
+    'empty.noMeetings': 'اولین نفری باشید که لینک جلسه به اشتراک می‌گذارد!',
+    'empty.signUpButton': 'ثبت نام برای افزودن جلسات',
+    'auth.loginRequired': 'ورود الزامی است',
+    'auth.loginMessage': 'برای افزودن، ویرایش یا حذف لینک‌های جلسه، باید وارد شوید.',
+    'auth.loginSignup': 'ورود / ثبت نام',
+    'common.cancel': 'لغو',
     'language.english': 'English',
     'language.persian': 'فارسی',
+    'nav.home': 'خانه',
+    'nav.myLinks': 'لینک‌های من',
+    'nav.join': 'پیوستن',
+    'nav.saved': 'ذخیره شده',
+    'nav.profile': 'پروفایل',
   }
 };
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('en');
@@ -107,8 +69,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     localStorage.setItem('language', language);
+    document.documentElement.lang = language;
     document.documentElement.dir = language === 'fa' ? 'rtl' : 'ltr';
-    document.documentElement.lang = language === 'fa' ? 'fa' : 'en';
   }, [language]);
 
   const t = (key: string): string => {
@@ -119,16 +81,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>
-      <div className={`${isRTL ? 'font-vazir' : 'font-roboto'} ${isRTL ? 'rtl' : 'ltr'}`}>
-        {children}
-      </div>
+      {children}
     </LanguageContext.Provider>
   );
 };
 
-export const useLanguage = (): LanguageContextType => {
+export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
