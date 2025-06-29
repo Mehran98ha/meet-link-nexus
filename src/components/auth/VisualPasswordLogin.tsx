@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import VisualPasswordImage from './VisualPasswordImage';
 import { PasswordClick, loginUser } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const VisualPasswordLogin: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -16,13 +17,14 @@ const VisualPasswordLogin: React.FC = () => {
   const [step, setStep] = useState<'username' | 'password'>('username');
   const { toast } = useToast();
   const { login } = useAuth();
+  const { t, isRTL } = useLanguage();
 
   const handleUsernameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter your username",
+        title: t('common.error'),
+        description: t('auth.enterUsername'),
         variant: "destructive"
       });
       return;
@@ -34,8 +36,8 @@ const VisualPasswordLogin: React.FC = () => {
   const handlePasswordSubmit = async () => {
     if (clicks.length === 0) {
       toast({
-        title: "Error",
-        description: "Please click your password pattern",
+        title: t('common.error'),
+        description: 'Please click your password pattern',
         variant: "destructive"
       });
       return;
@@ -48,14 +50,14 @@ const VisualPasswordLogin: React.FC = () => {
       
       if (result.success && result.user) {
         toast({
-          title: "Welcome back!",
+          title: t('auth.welcomeBack'),
           description: "You have been logged in successfully",
         });
         login(result.user);
       } else {
         toast({
           title: "Login Failed",
-          description: result.error || "Invalid credentials",
+          description: result.error || t('error.invalidCredentials'),
           variant: "destructive"
         });
         // Reset clicks on failed attempt
@@ -63,7 +65,7 @@ const VisualPasswordLogin: React.FC = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: t('common.error'),
         description: "An unexpected error occurred",
         variant: "destructive"
       });
@@ -79,16 +81,16 @@ const VisualPasswordLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+    <div className={`min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4 ${isRTL ? 'rtl font-vazirmatn' : 'ltr font-urbanist'}`}>
       <Card className="w-full max-w-4xl shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-900">
-            {step === 'username' ? 'Welcome Back!' : 'Enter Your Visual Password'}
+          <CardTitle className={`text-3xl font-bold text-gray-900 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+            {step === 'username' ? t('auth.welcomeBack') : t('auth.enterVisualPassword')}
           </CardTitle>
-          <p className="text-gray-600 mt-2">
+          <p className={`text-gray-600 mt-2 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
             {step === 'username' 
-              ? 'Enter your username to continue' 
-              : 'Click the same points you selected during registration'
+              ? t('auth.enterUsernameToLogin')
+              : t('auth.clickSamePoints')
             }
           </p>
         </CardHeader>
@@ -97,30 +99,33 @@ const VisualPasswordLogin: React.FC = () => {
           {step === 'username' ? (
             <form onSubmit={handleUsernameSubmit} className="space-y-4 max-w-md mx-auto">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username" className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}>
+                  {t('auth.username')}
+                </Label>
                 <Input
                   id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username"
-                  className="text-center text-lg"
+                  placeholder={t('auth.enterUsername')}
+                  className={`text-center text-lg ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
                   autoComplete="username"
+                  dir={isRTL ? 'rtl' : 'ltr'}
                 />
               </div>
               
-              <Button type="submit" className="w-full" size="lg">
-                Continue
+              <Button type="submit" className={`w-full ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`} size="lg">
+                {t('auth.continue')}
               </Button>
             </form>
           ) : (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  Hello, {username}!
+                <h3 className={`text-xl font-semibold text-gray-800 mb-2 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+                  {isRTL ? `سلام، ${username}!` : `Hello, ${username}!`}
                 </h3>
-                <p className="text-gray-600">
-                  Click to log in. Remember your click pattern!
+                <p className={`text-gray-600 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+                  {t('auth.rememberPattern')}
                 </p>
               </div>
 
@@ -131,21 +136,22 @@ const VisualPasswordLogin: React.FC = () => {
                 isSetup={false}
               />
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className={`flex flex-col sm:flex-row gap-3 justify-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Button
                   variant="outline"
                   onClick={handleBack}
                   disabled={isLoading}
+                  className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}
                 >
-                  Back
+                  {t('common.back')}
                 </Button>
                 
                 <Button
                   onClick={handlePasswordSubmit}
                   disabled={clicks.length === 0 || isLoading}
-                  className="px-8"
+                  className={`px-8 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
                 >
-                  {isLoading ? 'Logging in...' : 'Login'}
+                  {isLoading ? 'Logging in...' : t('auth.login')}
                 </Button>
               </div>
             </div>

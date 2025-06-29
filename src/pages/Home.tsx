@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -74,9 +75,12 @@ const Home: React.FC = () => {
   };
 
   const handleFormSubmit = async (meetingData: any) => {
+    console.log('Form data received:', meetingData);
     try {
-      await handleSubmit(meetingData, () => setShowForm(false));
+      await handleSubmit(meetingData);
+      setShowForm(false);
     } catch (error) {
+      console.error('Error submitting form:', error);
       // Error handling is done in the hook
     }
   };
@@ -88,6 +92,12 @@ const Home: React.FC = () => {
   const handleEditLink = (link: MeetLink) => {
     // For now, just log - you can implement edit modal later
     console.log('Edit link:', link);
+  };
+
+  const handleAuthPromptLogin = () => {
+    setShowAuthPrompt(false);
+    // Navigate to auth page or show auth modal
+    window.location.href = '/auth';
   };
 
   return (
@@ -121,7 +131,6 @@ const Home: React.FC = () => {
           <LoadingSkeleton />
         ) : filteredLinks.length === 0 ? (
           <EmptyState 
-            activeTab={activeTab}
             searchTerm={searchTerm}
             onAddMeeting={handleAddMeeting}
             isAuthenticated={isAuthenticated}
@@ -146,7 +155,7 @@ const Home: React.FC = () => {
       <Drawer open={showForm} onOpenChange={setShowForm}>
         <DrawerContent className="max-w-2xl mx-auto">
           <DrawerHeader>
-            <DrawerTitle className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}>
+            <DrawerTitle className={isRTL ? 'font-vazirmatn text-right' : 'font-urbanist text-left'}>
               {t('meetings.addNew')}
             </DrawerTitle>
           </DrawerHeader>
@@ -161,6 +170,7 @@ const Home: React.FC = () => {
       <AuthPromptDialog 
         isOpen={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}
+        onLoginClick={handleAuthPromptLogin}
       />
     </div>
   );

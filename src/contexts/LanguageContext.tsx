@@ -21,6 +21,39 @@ const translations = {
     'home.description': 'Professional platform for sharing and accessing Google Meet links',
     'home.addMeeting': 'Add Meeting Link',
     
+    // Tabs
+    'tabs.allMeetings': 'All Meetings',
+    'tabs.myMeetings': 'My Meetings',
+    
+    // Navigation
+    'nav.home': 'Home',
+    'nav.browseMeetings': 'Browse Meetings',
+    'nav.myLinks': 'My Links',
+    'nav.joinMeetings': 'Join Meetings',
+    'nav.savedLinks': 'Saved Links',
+    'nav.profile': 'Profile',
+    'nav.inviteFriends': 'Invite Friends',
+    'nav.logout': 'Logout',
+    'nav.login': 'Login',
+    
+    // Meetings
+    'meetings.addNew': 'Add New Meeting',
+    'meetings.editMeeting': 'Edit Meeting',
+    'meetings.googleMeetUrl': 'Google Meet URL',
+    'meetings.meetingName': 'Meeting Name',
+    'meetings.yourName': 'Your Name',
+    'meetings.notes': 'Notes',
+    'meetings.optionalNotes': 'Optional meeting details...',
+    'meetings.urlRequired': 'URL is required',
+    'meetings.nameRequired': 'Meeting name is required',
+    'meetings.creatorRequired': 'Creator name is required',
+    'meetings.validUrlRequired': 'Please enter a valid Google Meet URL',
+    'meetings.maxChars': 'chars max',
+    'meetings.adding': 'Adding...',
+    'meetings.addMeetingLink': 'Add Meeting Link',
+    'meetings.saving': 'Saving...',
+    'meetings.saveChanges': 'Save Changes',
+    
     // Search and filters
     'search.placeholder': 'Search meetings...',
     'empty.title': 'No meetings found',
@@ -55,6 +88,10 @@ const translations = {
     'auth.profilePicture': 'Profile Picture',
     'auth.uploadPhoto': 'Upload Photo',
     'auth.chooseAvatar': 'Choose Avatar',
+    'auth.enterVisualPassword': 'Enter Your Visual Password',
+    'auth.clickSamePoints': 'Click the same points you selected during registration',
+    'auth.enterUsernameToLogin': 'Enter your username to continue',
+    'auth.rememberPattern': 'Click to log in. Remember your click pattern!',
     
     // Common actions
     'common.cancel': 'Cancel',
@@ -66,20 +103,12 @@ const translations = {
     'common.loading': 'Loading...',
     'common.error': 'Error',
     'common.success': 'Success',
+    'common.join': 'Join',
     
     // Language switcher
     'language.english': 'English',
     'language.persian': 'Persian',
     'language.switch': 'Switch Language',
-    
-    // Navigation
-    'nav.home': 'Home',
-    'nav.myLinks': 'My Links',
-    'nav.join': 'Join',
-    'nav.saved': 'Saved',
-    'nav.profile': 'Profile',
-    'nav.inviteFriends': 'Invite Friends',
-    'nav.logout': 'Logout',
     
     // Profile
     'profile.title': 'Profile',
@@ -122,6 +151,39 @@ const translations = {
     'home.description': 'پلتفرم حرفه‌ای برای اشتراک‌گذاری و دسترسی به لینک‌های گوگل میت',
     'home.addMeeting': 'افزودن لینک جلسه',
     
+    // Tabs
+    'tabs.allMeetings': 'همه جلسات',
+    'tabs.myMeetings': 'جلسات من',
+    
+    // Navigation
+    'nav.home': 'خانه',
+    'nav.browseMeetings': 'مرور جلسات',
+    'nav.myLinks': 'لینک‌های من',
+    'nav.joinMeetings': 'پیوستن به جلسات',
+    'nav.savedLinks': 'لینک‌های ذخیره شده',
+    'nav.profile': 'پروفایل',
+    'nav.inviteFriends': 'دعوت از دوستان',
+    'nav.logout': 'خروج',
+    'nav.login': 'ورود',
+    
+    // Meetings
+    'meetings.addNew': 'افزودن جلسه جدید',
+    'meetings.editMeeting': 'ویرایش جلسه',
+    'meetings.googleMeetUrl': 'لینک گوگل میت',
+    'meetings.meetingName': 'نام جلسه',
+    'meetings.yourName': 'نام شما',
+    'meetings.notes': 'یادداشت‌ها',
+    'meetings.optionalNotes': 'جزئیات اختیاری جلسه...',
+    'meetings.urlRequired': 'لینک الزامی است',
+    'meetings.nameRequired': 'نام جلسه الزامی است',
+    'meetings.creatorRequired': 'نام سازنده الزامی است',
+    'meetings.validUrlRequired': 'لطفاً لینک معتبر گوگل میت وارد کنید',
+    'meetings.maxChars': 'حداکثر کاراکتر',
+    'meetings.adding': 'در حال افزودن...',
+    'meetings.addMeetingLink': 'افزودن لینک جلسه',
+    'meetings.saving': 'در حال ذخیره...',
+    'meetings.saveChanges': 'ذخیره تغییرات',
+    
     // Search and filters
     'search.placeholder': 'جستجوی جلسات...',
     'empty.title': 'هیچ جلسه‌ای یافت نشد',
@@ -156,6 +218,10 @@ const translations = {
     'auth.profilePicture': 'تصویر پروفایل',
     'auth.uploadPhoto': 'آپلود عکس',
     'auth.chooseAvatar': 'انتخاب آواتار',
+    'auth.enterVisualPassword': 'رمز تصویری خود را وارد کنید',
+    'auth.clickSamePoints': 'همان نقاطی را که در هنگام ثبت نام انتخاب کردید، کلیک کنید',
+    'auth.enterUsernameToLogin': 'نام کاربری خود را برای ادامه وارد کنید',
+    'auth.rememberPattern': 'برای ورود کلیک کنید. الگوی کلیک خود را به یاد داشته باشید!',
     
     // Common actions
     'common.cancel': 'لغو',
@@ -167,20 +233,12 @@ const translations = {
     'common.loading': 'در حال بارگذاری...',
     'common.error': 'خطا',
     'common.success': 'موفقیت',
+    'common.join': 'پیوستن',
     
     // Language switcher
     'language.english': 'English',
     'language.persian': 'فارسی',
     'language.switch': 'تغییر زبان',
-    
-    // Navigation
-    'nav.home': 'خانه',
-    'nav.myLinks': 'لینک‌های من',
-    'nav.join': 'پیوستن',
-    'nav.saved': 'ذخیره شده',
-    'nav.profile': 'پروفایل',
-    'nav.inviteFriends': 'دعوت از دوستان',
-    'nav.logout': 'خروج',
     
     // Profile
     'profile.title': 'پروفایل',
