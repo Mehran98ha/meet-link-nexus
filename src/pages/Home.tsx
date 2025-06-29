@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -170,7 +168,6 @@ const Home: React.FC = () => {
       <AuthPromptDialog 
         isOpen={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}
-        onLoginClick={handleAuthPromptLogin}
       />
     </div>
   );
