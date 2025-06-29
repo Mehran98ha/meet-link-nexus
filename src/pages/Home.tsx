@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMeetings } from '@/hooks/useMeetings';
+import { MeetLink } from '@/services/meetLinksService';
 import MeetingTabs from '@/components/meetings/MeetingTabs';
 import MeetingFilters from '@/components/meetings/MeetingFilters';
 import MeetingCard from '@/components/meetings/MeetingCard';
