@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -84,6 +83,11 @@ const Home: React.FC = () => {
     setActiveTab(value as 'all' | 'my');
   };
 
+  const handleEditLink = (link: MeetLink) => {
+    // For now, just log - you can implement edit modal later
+    console.log('Edit link:', link);
+  };
+
   return (
     <div className={`min-h-screen bg-gradient-to-br from-primary-50 via-white to-gradient-start/10 p-4 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -126,7 +130,7 @@ const Home: React.FC = () => {
               <MeetingCard
                 key={link.id}
                 link={link}
-                onEdit={handleUpdateLink}
+                onEdit={handleEditLink}
                 onDelete={handleDelete}
                 showActions={checkCanEdit(link)}
                 onAddMeeting={handleAddMeeting}
