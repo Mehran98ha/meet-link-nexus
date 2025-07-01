@@ -18,7 +18,7 @@ import { useAnimatedToast } from '@/components/ui/toast-container';
 
 const Home = () => {
   const { t, isRTL } = useLanguage();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { showToast } = useAnimatedToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -27,11 +27,11 @@ const Home = () => {
   const [selectedCreator, setSelectedCreator] = useState<string>('');
 
   const {
-    data: meetings = [],
+    links: meetings = [],
     isLoading,
-    createMeeting,
-    updateMeeting,
-    deleteMeeting
+    handleSubmit: createMeeting,
+    handleUpdateLink: updateMeeting,
+    handleDelete: deleteMeeting
   } = useMeetings();
 
   const filteredMeetings = meetings.filter(meeting => {
@@ -44,8 +44,7 @@ const Home = () => {
 
   const handleCreateMeeting = async (meetingData: any) => {
     try {
-      await createMeeting.mutateAsync(meetingData);
-      setIsCreating(false);
+      await createMeeting(meetingData, () => setIsCreating(false));
       showToast({
         title: "Meeting Created",
         description: "Your meeting has been successfully created and is ready to share",
@@ -66,7 +65,7 @@ const Home = () => {
     if (!editingLink) return;
     
     try {
-      await updateMeeting.mutateAsync({ id: editingLink.id, ...meetingData });
+      await updateMeeting(editingLink.id, meetingData);
       setEditingLink(null);
       showToast({
         title: "Meeting Updated",
@@ -86,7 +85,7 @@ const Home = () => {
 
   const handleDeleteMeeting = async (id: string) => {
     try {
-      await deleteMeeting.mutateAsync(id);
+      await deleteMeeting(id);
       showToast({
         title: "Meeting Deleted",
         description: "The meeting has been permanently removed",
@@ -191,9 +190,8 @@ const Home = () => {
             {showFilters && (
               <div className="animate-ios-fade-in">
                 <MeetingFilters
-                  meetings={meetings}
-                  selectedCreator={selectedCreator}
-                  onCreatorChange={setSelectedCreator}
+                  searchTerm={searchQuery}
+                  onSearchChange={setSearchQuery}
                 />
               </div>
             )}
@@ -204,7 +202,11 @@ const Home = () => {
         {isLoading ? (
           <LoadingSkeleton />
         ) : filteredMeetings.length === 0 ? (
-          <EmptyState onAddMeeting={() => setIsCreating(true)} />
+          <EmptyState 
+            searchTerm={searchQuery}
+            isAuthenticated={isAuthenticated}
+            onAddMeeting={() => setIsCreating(true)} 
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-ios-md">
             {filteredMeetings.map((meeting) => (
@@ -225,17 +227,18 @@ const Home = () => {
       {isCreating && (
         <MeetingForm
           onSubmit={handleCreateMeeting}
-          onCancel={() => setIsCreating(false)}
-          isLoading={createMeeting.isPending}
+          onClose={() => setIsCreating(false)}
+          isLoading={false}
         />
       )}
 
       {editingLink && (
         <EditLinkModal
           link={editingLink}
+          isOpen={!!editingLink}
+          onClose={() => setEditingLink(null)}
           onSave={handleUpdateMeeting}
-          onCancel={() => setEditingLink(null)}
-          isLoading={updateMeeting.isPending}
+          isLoading={false}
         />
       )}
     </div>

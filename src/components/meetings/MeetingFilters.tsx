@@ -30,7 +30,7 @@ const MeetingFilters: React.FC<MeetingFiltersProps> = ({
           value={searchTerm}
           onChange={e => onSearchChange(e.target.value)}
           className={`h-16 text-lg rounded-2xl border-2 border-gray-200 bg-white/80 backdrop-blur-sm shadow-lg focus:shadow-xl focus:border-blue-400 transition-all duration-300 ${
-            isRTL ? 'pr-16 pl-6 font-vazirmatn' : 'pl-16 pr-6 font-urbanist'
+            isRTL ? 'pr-16 pl-6 font-vazirmatn' : 'pl-16 pr-6 font-vazirmatn'
           }`}
           dir={isRTL ? 'rtl' : 'ltr'}
         />
@@ -63,7 +63,7 @@ const MeetingFilters: React.FC<MeetingFiltersProps> = ({
       {searchTerm && (
         <div className="hidden sm:flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-200">
           <Sparkles className="h-4 w-4 mr-2" />
-          <span className={`text-sm font-medium ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+          <span className={`text-sm font-medium font-vazirmatn`}>
             {t('search.results')}
           </span>
         </div>
