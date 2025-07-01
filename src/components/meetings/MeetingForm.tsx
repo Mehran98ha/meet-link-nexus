@@ -8,9 +8,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface MeetingFormProps {
   onSubmit: (meetingData: any) => Promise<void>;
   isSubmitting: boolean;
+  onClose: () => void;
 }
 
-const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => {
+const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting, onClose }) => {
   const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState({
     url: '',
@@ -19,7 +20,6 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => 
     notes: ''
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isOpen, setIsOpen] = useState(true);
 
   const validateGoogleMeetUrl = (url: string): boolean => {
     const meetUrlPattern = /^https:\/\/meet\.google\.com\/[a-z-]+$/;
@@ -72,22 +72,16 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => 
       await onSubmit(formData);
       // Reset form on success
       setFormData({ url: '', name: '', creator: '', notes: '' });
-      setIsOpen(false);
+      onClose();
     } catch (error) {
       // Error handling is done in the parent component
       console.error('Form submission error:', error);
     }
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-  };
-
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-ios-2xl shadow-ios-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-ios-secondary-bg rounded-ios-2xl shadow-ios-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-ios-gray-5/50">
         {/* Header */}
         <div className="flex items-center justify-between p-ios-lg border-b border-ios-gray-5">
           <h2 className="ios-text-title-2 font-bold text-ios-label">
@@ -96,7 +90,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => 
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleClose}
+            onClick={onClose}
             className="h-8 w-8 rounded-full hover:bg-ios-gray-5"
           >
             <X className="h-4 w-4" />
@@ -219,7 +213,7 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ onSubmit, isSubmitting }) => 
               <Button 
                 variant="outline" 
                 type="button" 
-                onClick={handleClose}
+                onClick={onClose}
                 className={`h-12 px-ios-lg ios-text-body font-semibold rounded-ios-lg border-2 border-ios-gray-4 bg-ios-gray-6 hover:bg-ios-gray-5 text-ios-secondary-label hover:text-ios-label transition-all duration-200 ${isRTL ? 'font-vazirmatn' : 'font-vazirmatn'}`}
               >
                 {t('common.cancel')}

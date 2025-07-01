@@ -1,77 +1,97 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Camera, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useAnimatedToast } from '@/components/ui/toast-container';
 
 interface ProfilePictureUploadProps {
   currentImageUrl?: string;
   onImageUpdate: (url: string) => void;
 }
 
-const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ 
-  currentImageUrl, 
-  onImageUpdate 
+const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
+  currentImageUrl,
+  onImageUpdate
 }) => {
+  const { user } = useAuth();
+  const { showToast } = useAnimatedToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const { user } = useAuth();
-  const { toast } = useToast();
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select an image file",
-        variant: "destructive"
+      showToast({
+        title: "Invalid File Type",
+        description: "Please select an image file (JPG, PNG, etc.)",
+        variant: "error",
+        duration: 4000
       });
       return;
     }
 
-    // Validate file size (max 5MB)
+    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
+      showToast({
+        title: "File Too Large",
         description: "Please select an image smaller than 5MB",
-        variant: "destructive"
+        variant: "error",
+        duration: 4000
       });
       return;
     }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviewUrl(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload file
+    uploadFile(file);
+  };
+
+  const uploadFile = async (file: File) => {
+    if (!user) return;
 
     setIsUploading(true);
-
     try {
-      // Create preview
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-
-      // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/profile.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      // Delete existing file if it exists
+      if (currentImageUrl) {
+        const existingPath = currentImageUrl.split('/').pop();
+        if (existingPath) {
+          await supabase.storage
+            .from('profile-images')
+            .remove([`${user.id}/${existingPath}`]);
+        }
+      }
+
+      // Upload new file
+      const { data, error } = await supabase.storage
         .from('profile-images')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
 
-      if (uploadError) throw uploadError;
+      if (error) throw error;
 
       // Get public URL
-      const { data } = supabase.storage
+      const { data: { publicUrl } } = supabase.storage
         .from('profile-images')
         .getPublicUrl(fileName);
 
-      const publicUrl = data.publicUrl;
-
-      // Update user profile in database
+      // Update user profile
       const { error: updateError } = await supabase
         .from('users')
         .update({ profile_image_url: publicUrl })
@@ -81,70 +101,131 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
       onImageUpdate(publicUrl);
       setPreviewUrl(null);
-      URL.revokeObjectURL(objectUrl);
 
-      toast({
-        title: "Profile picture updated",
+      showToast({
+        title: "Profile Picture Updated",
         description: "Your profile picture has been successfully updated",
-        className: "bg-ios-green text-ios-label-on-green border-ios-green/20"
+        variant: "success",
+        duration: 4000
       });
 
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast({
-        title: "Upload failed",
-        description: "Failed to update profile picture. Please try again.",
-        variant: "destructive"
+      showToast({
+        title: "Upload Failed",
+        description: "Failed to upload profile picture. Please try again.",
+        variant: "error",
+        duration: 4000
       });
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(null);
-      }
+      setPreviewUrl(null);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const displayImage = previewUrl || currentImageUrl;
+  const handleRemoveImage = async () => {
+    if (!user || !currentImageUrl) return;
+
+    setIsUploading(true);
+    try {
+      // Delete file from storage
+      const path = currentImageUrl.split('/').pop();
+      if (path) {
+        await supabase.storage
+          .from('profile-images')
+          .remove([`${user.id}/${path}`]);
+      }
+
+      // Update user profile
+      const { error } = await supabase
+        .from('users')
+        .update({ profile_image_url: null })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      onImageUpdate('');
+
+      showToast({
+        title: "Profile Picture Removed",
+        description: "Your profile picture has been removed",
+        variant: "info",
+        duration: 3000
+      });
+
+    } catch (error) {
+      console.error('Error removing image:', error);
+      showToast({
+        title: "Removal Failed",
+        description: "Failed to remove profile picture. Please try again.",
+        variant: "error",
+        duration: 4000
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const displayUrl = previewUrl || currentImageUrl;
 
   return (
-    <div className="relative group">
-      <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-ios-2xl overflow-hidden bg-gradient-to-br from-ios-blue/20 to-ios-purple/20 border-4 border-white shadow-ios-lg">
-        {displayImage ? (
-          <img
-            src={displayImage}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Camera className="h-8 w-8 sm:h-12 sm:w-12 text-ios-blue" />
-          </div>
-        )}
-        
-        {/* Upload overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          {isUploading ? (
-            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+    <div className="flex flex-col items-center space-y-ios-md">
+      {/* Profile Picture Display */}
+      <div className="relative">
+        <div className="w-32 h-32 rounded-ios-2xl bg-gradient-to-br from-ios-blue/20 to-ios-purple/20 flex items-center justify-center overflow-hidden shadow-ios-lg border-4 border-ios-gray-6">
+          {displayUrl ? (
+            <img
+              src={displayUrl}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           ) : (
-            <Upload className="h-6 w-6 text-white" />
+            <Camera className="w-12 h-12 text-ios-gray" />
           )}
         </div>
+
+        {/* Loading Overlay */}
+        {isUploading && (
+          <div className="absolute inset-0 bg-black/50 rounded-ios-2xl flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-3 border-white border-t-transparent"></div>
+          </div>
+        )}
+
+        {/* Remove Button */}
+        {currentImageUrl && !isUploading && (
+          <button
+            onClick={handleRemoveImage}
+            className="absolute -top-2 -right-2 w-8 h-8 bg-ios-red hover:bg-ios-red-dark text-white rounded-full flex items-center justify-center shadow-ios-md transition-all duration-200 hover:scale-110"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      {/* Upload button */}
-      <label className="absolute -bottom-2 -right-2 cursor-pointer">
-        <div className="w-10 h-10 bg-ios-blue rounded-full flex items-center justify-center shadow-ios-md border-4 border-white hover:bg-ios-blue-dark transition-colors duration-200 ios-spring">
-          <Camera className="h-5 w-5 text-white" />
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
+      {/* Upload Button */}
+      <div className="flex flex-col items-center space-y-ios-sm">
+        <Button
+          onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-        />
-      </label>
+          className="bg-gradient-to-r from-ios-blue to-ios-purple hover:from-ios-blue-dark hover:to-ios-purple-dark text-white px-ios-lg py-ios-md rounded-ios-lg font-semibold shadow-ios-md hover:shadow-ios-lg transition-all duration-200 transform hover:scale-105"
+        >
+          <Upload className="w-4 h-4 mr-2" />
+          {currentImageUrl ? 'Change Picture' : 'Upload Picture'}
+        </Button>
+
+        <p className="ios-text-caption text-ios-secondary-label text-center">
+          JPG, PNG up to 5MB
+        </p>
+      </div>
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
     </div>
   );
 };

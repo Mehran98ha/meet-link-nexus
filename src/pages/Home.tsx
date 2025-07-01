@@ -26,7 +26,7 @@ const Home = () => {
   const [editingLink, setEditingLink] = useState<MeetLink | null>(null);
 
   const {
-    links: meetings = [],
+    links,
     isLoading,
     isSubmitting,
     handleSubmit,
@@ -34,7 +34,7 @@ const Home = () => {
     handleDelete
   } = useMeetings();
 
-  const filteredMeetings = meetings.filter(meeting => {
+  const filteredMeetings = links.filter(meeting => {
     const matchesSearch = meeting.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          meeting.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (meeting.notes && meeting.notes.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -150,7 +150,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row gap-ios-sm justify-center">
               <Button
                 onClick={() => setIsCreating(true)}
-                className="bg-ios-blue hover:bg-ios-blue-dark text-ios-label-on-blue rounded-ios-lg px-ios-lg py-ios-md font-semibold shadow-ios-md hover:shadow-ios-lg transition-all duration-200 ios-spring"
+                className="bg-ios-blue hover:bg-ios-blue-dark text-white rounded-ios-lg px-ios-lg py-ios-md font-semibold shadow-ios-md hover:shadow-ios-lg transition-all duration-200 ios-spring"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 {t('meetings.createNew')}
@@ -227,6 +227,7 @@ const Home = () => {
         <MeetingForm
           onSubmit={handleCreateMeeting}
           isSubmitting={isSubmitting}
+          onClose={() => setIsCreating(false)}
         />
       )}
 
