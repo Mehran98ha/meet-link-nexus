@@ -24,27 +24,26 @@ const Home = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [editingLink, setEditingLink] = useState<MeetLink | null>(null);
-  const [selectedCreator, setSelectedCreator] = useState<string>('');
 
   const {
     links: meetings = [],
     isLoading,
-    handleSubmit: createMeeting,
-    handleUpdateLink: updateMeeting,
-    handleDelete: deleteMeeting
+    isSubmitting,
+    handleSubmit,
+    handleUpdateLink,
+    handleDelete
   } = useMeetings();
 
   const filteredMeetings = meetings.filter(meeting => {
     const matchesSearch = meeting.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          meeting.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (meeting.notes && meeting.notes.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCreator = !selectedCreator || meeting.creator === selectedCreator;
-    return matchesSearch && matchesCreator;
+    return matchesSearch;
   });
 
   const handleCreateMeeting = async (meetingData: any) => {
     try {
-      await createMeeting(meetingData, () => setIsCreating(false));
+      await handleSubmit(meetingData, () => setIsCreating(false));
       showToast({
         title: "Meeting Created",
         description: "Your meeting has been successfully created and is ready to share",
@@ -65,7 +64,7 @@ const Home = () => {
     if (!editingLink) return;
     
     try {
-      await updateMeeting(editingLink.id, meetingData);
+      await handleUpdateLink(editingLink.id, meetingData);
       setEditingLink(null);
       showToast({
         title: "Meeting Updated",
@@ -85,7 +84,7 @@ const Home = () => {
 
   const handleDeleteMeeting = async (id: string) => {
     try {
-      await deleteMeeting(id);
+      await handleDelete(id);
       showToast({
         title: "Meeting Deleted",
         description: "The meeting has been permanently removed",
@@ -227,8 +226,7 @@ const Home = () => {
       {isCreating && (
         <MeetingForm
           onSubmit={handleCreateMeeting}
-          onClose={() => setIsCreating(false)}
-          isLoading={false}
+          isSubmitting={isSubmitting}
         />
       )}
 
