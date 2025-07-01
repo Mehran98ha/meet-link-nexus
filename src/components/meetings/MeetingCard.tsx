@@ -18,34 +18,40 @@ interface MeetingCardProps {
 
 const colorSchemes = [
   {
-    bg: 'bg-gradient-to-br from-blue-50 to-indigo-100',
-    border: 'border-blue-200/50',
-    badge: 'bg-blue-100 text-blue-800 border-blue-300',
-    button: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+    gradient: 'from-ios-blue/20 to-ios-purple/20',
+    accent: 'ios-blue',
+    badge: 'bg-ios-blue/10 text-ios-blue border-ios-blue/20',
+    button: 'bg-ios-blue hover:bg-blue-600 active:bg-blue-700'
   },
   {
-    bg: 'bg-gradient-to-br from-purple-50 to-pink-100',
-    border: 'border-purple-200/50',
-    badge: 'bg-purple-100 text-purple-800 border-purple-300',
-    button: 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+    gradient: 'from-ios-green/20 to-ios-teal/20',
+    accent: 'ios-green',
+    badge: 'bg-ios-green/10 text-ios-green border-ios-green/20',
+    button: 'bg-ios-green hover:bg-green-600 active:bg-green-700'
   },
   {
-    bg: 'bg-gradient-to-br from-emerald-50 to-teal-100',
-    border: 'border-emerald-200/50',
-    badge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-    button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
+    gradient: 'from-ios-purple/20 to-ios-pink/20',
+    accent: 'ios-purple',
+    badge: 'bg-ios-purple/10 text-ios-purple border-ios-purple/20',
+    button: 'bg-ios-purple hover:bg-purple-600 active:bg-purple-700'
   },
   {
-    bg: 'bg-gradient-to-br from-orange-50 to-red-100',
-    border: 'border-orange-200/50',
-    badge: 'bg-orange-100 text-orange-800 border-orange-300',
-    button: 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700'
+    gradient: 'from-ios-orange/20 to-ios-red/20',
+    accent: 'ios-orange',
+    badge: 'bg-ios-orange/10 text-ios-orange border-ios-orange/20',
+    button: 'bg-ios-orange hover:bg-orange-600 active:bg-orange-700'
   },
   {
-    bg: 'bg-gradient-to-br from-cyan-50 to-blue-100',
-    border: 'border-cyan-200/50',
-    badge: 'bg-cyan-100 text-cyan-800 border-cyan-300',
-    button: 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700'
+    gradient: 'from-ios-teal/20 to-ios-cyan/20',
+    accent: 'ios-teal',
+    badge: 'bg-ios-teal/10 text-ios-teal border-ios-teal/20',
+    button: 'bg-ios-teal hover:bg-teal-600 active:bg-teal-700'
+  },
+  {
+    gradient: 'from-ios-indigo/20 to-ios-blue/20',
+    accent: 'ios-indigo',
+    badge: 'bg-ios-indigo/10 text-ios-indigo border-ios-indigo/20',
+    button: 'bg-ios-indigo hover:bg-indigo-600 active:bg-indigo-700'
   }
 ];
 
@@ -67,41 +73,41 @@ const MeetingCard: React.FC<MeetingCardProps> = ({
   const colorScheme = colorSchemes[colorIndex];
 
   return (
-    <Card className={`${colorScheme.bg} ${colorScheme.border} border-2 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden group hover:scale-105`}>
-      <CardHeader className="pb-4 relative">
-        <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl"></div>
+    <Card className={`ios-card ios-hover-lift overflow-hidden bg-gradient-to-br ${colorScheme.gradient} border-2 border-white/50 backdrop-blur-ios`}>
+      <CardHeader className="pb-ios-sm relative">
+        <div className="absolute inset-0 bg-white/30 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-t-ios-lg"></div>
         <div className="relative z-10 flex justify-between items-start">
           <div className="flex-1">
-            <h3 className={`font-bold text-xl text-gray-900 line-clamp-2 mb-2 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+            <h3 className={`ios-text-headline text-ios-label line-clamp-2 mb-ios-xs`}>
               {link.name}
             </h3>
-            <p className={`text-gray-700 font-medium ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+            <p className={`ios-text-callout text-ios-secondary-label`}>
               {t('meetings.by')} {link.creator}
             </p>
           </div>
-          <Badge className={`${colorScheme.badge} font-semibold px-3 py-1 rounded-xl border-2`}>
+          <Badge className={`${colorScheme.badge} font-semibold px-ios-sm py-1 rounded-ios-md border-2 backdrop-blur-sm`}>
             {t('meetings.meeting')}
           </Badge>
         </div>
       </CardHeader>
       
-      <CardContent className="pb-4">
+      <CardContent className="pb-ios-sm">
         {link.notes && (
-          <div className="bg-white/40 rounded-xl p-4 mb-4 backdrop-blur-sm">
-            <p className={`text-gray-800 text-sm line-clamp-3 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
+          <div className="bg-white/40 rounded-ios-md p-ios-sm mb-ios-sm backdrop-blur-sm border border-white/30">
+            <p className={`ios-text-subhead text-ios-secondary-label line-clamp-3`}>
               {link.notes}
             </p>
           </div>
         )}
-        <div className="flex items-center text-sm text-gray-600 bg-white/30 rounded-xl px-3 py-2">
-          <Clock className="h-4 w-4 mr-2" />
-          <span className={isRTL ? 'font-vazirmatn' : 'font-urbanist'}>
+        <div className="flex items-center ios-text-caption text-ios-tertiary-label bg-white/30 rounded-ios-md px-ios-sm py-2 backdrop-blur-sm">
+          <Clock className="h-3 w-3 mr-2" />
+          <span>
             {t('meetings.added')} {formatRelativeTime(link.created_at)}
           </span>
         </div>
       </CardContent>
       
-      <CardFooter className="flex justify-between items-center border-t-2 border-white/30 pt-4 bg-white/20">
+      <CardFooter className="flex justify-between items-center border-t-2 border-white/30 pt-ios-sm bg-white/20 backdrop-blur-sm">
         <div className="flex gap-2">
           {showActions && (
             <>
@@ -109,7 +115,7 @@ const MeetingCard: React.FC<MeetingCardProps> = ({
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onEdit(link)}
-                className="h-10 w-10 rounded-xl hover:bg-white/40 text-gray-700 hover:text-gray-900 transition-all duration-200"
+                className="h-10 w-10 rounded-ios-md hover:bg-white/40 text-ios-secondary-label hover:text-ios-label transition-all duration-200 ios-spring"
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -117,7 +123,7 @@ const MeetingCard: React.FC<MeetingCardProps> = ({
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onDelete(link.id)}
-                className="h-10 w-10 rounded-xl hover:bg-red-100 text-red-600 hover:text-red-800 transition-all duration-200"
+                className="h-10 w-10 rounded-ios-md hover:bg-ios-red/10 text-ios-red hover:text-red-700 transition-all duration-200 ios-spring"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -128,7 +134,7 @@ const MeetingCard: React.FC<MeetingCardProps> = ({
           href={link.url} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className={`inline-flex items-center justify-center rounded-xl ${colorScheme.button} text-white font-semibold py-3 px-6 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}
+          className={`inline-flex items-center justify-center rounded-ios-md ${colorScheme.button} text-white font-semibold py-ios-sm px-ios-md shadow-ios-sm hover:shadow-ios-md transition-all duration-200 ios-spring ios-text-callout`}
         >
           <span className="mr-2">{t('meetings.join')}</span>
           <ExternalLink className="h-4 w-4" />

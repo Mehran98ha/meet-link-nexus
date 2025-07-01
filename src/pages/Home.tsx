@@ -100,25 +100,27 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Modern Header with Better Typography */}
-        <div className={`text-center space-y-6 py-8 ${isRTL ? 'font-vazirmatn' : 'font-urbanist'}`}>
-          <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <div className="w-6 h-6 bg-white rounded-lg"></div>
+    <div className={`min-h-screen bg-ios-system-bg ${isRTL ? 'rtl' : 'ltr'}`}>
+      <div className="max-w-7xl mx-auto px-ios-md py-ios-lg space-y-ios-lg">
+        {/* iOS-Style Hero Section */}
+        <div className="text-center space-y-ios-md py-ios-xl">
+          <div className="inline-flex items-center justify-center p-ios-md bg-gradient-to-br from-ios-blue/10 to-ios-purple/10 rounded-ios-xl mb-ios-md ios-spring">
+            <div className="w-16 h-16 bg-gradient-to-br from-ios-blue to-ios-purple rounded-ios-lg flex items-center justify-center shadow-ios-md">
+              <div className="w-8 h-8 bg-white rounded-ios-md flex items-center justify-center">
+                <div className="w-4 h-4 bg-ios-blue rounded-ios-sm"></div>
+              </div>
             </div>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent leading-tight">
+          <h1 className="ios-text-title-1 bg-gradient-to-r from-ios-blue via-ios-purple to-ios-blue bg-clip-text text-transparent animate-ios-fade-in">
             {t('app.name')}
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="ios-text-body text-ios-secondary-label max-w-2xl mx-auto leading-relaxed">
             {t('app.description')}
           </p>
         </div>
 
-        {/* Enhanced Tabs with Modern Design */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-white/20">
+        {/* iOS-Style Navigation Tabs */}
+        <div className="ios-card ios-spring">
           <MeetingTabs 
             activeTab={activeTab} 
             onTabChange={handleTabChange}
@@ -126,12 +128,14 @@ const Home: React.FC = () => {
           />
         </div>
 
-        {/* Improved Filters */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
-          <MeetingFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-          />
+        {/* iOS-Style Filters */}
+        <div className="ios-card ios-spring">
+          <div className="p-ios-md">
+            <MeetingFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+          </div>
         </div>
 
         {/* Content Area */}
@@ -139,7 +143,7 @@ const Home: React.FC = () => {
           {isLoading ? (
             <LoadingSkeleton />
           ) : filteredLinks.length === 0 ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-12 shadow-lg border border-white/20">
+            <div className="ios-card-elevated p-ios-xl">
               <EmptyState 
                 searchTerm={searchTerm}
                 onAddMeeting={handleAddMeeting}
@@ -147,31 +151,32 @@ const Home: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-ios-md sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {filteredLinks.map((link) => (
-                <MeetingCard
-                  key={link.id}
-                  link={link}
-                  onEdit={handleEditLink}
-                  onDelete={handleDelete}
-                  showActions={checkCanEdit(link)}
-                  onAddMeeting={handleAddMeeting}
-                />
+                <div key={link.id} className="ios-spring ios-hover-scale">
+                  <MeetingCard
+                    link={link}
+                    onEdit={handleEditLink}
+                    onDelete={handleDelete}
+                    showActions={checkCanEdit(link)}
+                    onAddMeeting={handleAddMeeting}
+                  />
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Enhanced Drawer with Better Styling */}
+      {/* iOS-Style Drawer */}
       <Drawer open={showForm} onOpenChange={setShowForm}>
-        <DrawerContent className="max-w-3xl mx-auto bg-white rounded-t-3xl border-0 shadow-2xl">
-          <DrawerHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-3xl border-b border-gray-100">
-            <DrawerTitle className={`text-2xl font-bold text-gray-900 ${isRTL ? 'font-vazirmatn text-right' : 'font-urbanist text-left'}`}>
+        <DrawerContent className="max-w-3xl mx-auto bg-ios-secondary-bg rounded-t-ios-xl border-0 shadow-ios-xl">
+          <DrawerHeader className="bg-gradient-to-r from-ios-blue/5 to-ios-purple/5 rounded-t-ios-xl border-b border-ios-gray-5 p-ios-lg">
+            <DrawerTitle className={`ios-text-title-2 text-ios-label ${isRTL ? 'text-right' : 'text-left'}`}>
               {t('meetings.addNew')}
             </DrawerTitle>
           </DrawerHeader>
-          <div className="p-6">
+          <div className="p-ios-lg">
             <MeetingForm
               onSubmit={handleFormSubmit}
               isSubmitting={isSubmitting}
