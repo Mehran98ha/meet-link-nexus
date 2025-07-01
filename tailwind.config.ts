@@ -15,6 +15,10 @@ export default {
 			center: true,
 			padding: '2rem',
 			screens: {
+				'sm': '640px',
+				'md': '768px',
+				'lg': '1024px',
+				'xl': '1280px',
 				'2xl': '1400px'
 			}
 		},
@@ -22,23 +26,28 @@ export default {
 			fontFamily: {
 				'vazir': ['Vazir', 'Vazirmatn', 'system-ui', 'sans-serif'],
 				'vazirmatn': ['Vazir', 'Vazirmatn', 'system-ui', 'sans-serif'],
-				'urbanist': ['Vazir', 'Vazirmatn', 'system-ui', 'sans-serif'], // Override with Vazir
-				'roboto': ['Vazir', 'Vazirmatn', 'system-ui', 'sans-serif'], // Override with Vazir
+				'urbanist': ['Vazir', 'Vazirmatn', 'system-ui', 'sans-serif'],
+				'roboto': ['Vazir', 'Vazirmatn', 'system-ui', 'sans-serif'],
 			},
 			colors: {
-				// iOS System Colors
+				// iOS System Colors with proper contrast
 				'ios-blue': '#007AFF',
+				'ios-blue-dark': '#0056CC',
 				'ios-purple': '#AF52DE',
+				'ios-purple-dark': '#8A42B2',
 				'ios-green': '#34C759',
+				'ios-green-dark': '#2BA946',
 				'ios-red': '#FF3B30',
+				'ios-red-dark': '#CC2E24',
 				'ios-orange': '#FF9500',
+				'ios-orange-dark': '#CC7700',
 				'ios-pink': '#FF2D92',
 				'ios-teal': '#5AC8FA',
 				'ios-indigo': '#5856D6',
 				'ios-mint': '#00C7BE',
 				'ios-cyan': '#32D74B',
 				
-				// iOS Gray Scale
+				// iOS Gray Scale with proper contrast
 				'ios-gray': '#8E8E93',
 				'ios-gray-2': '#AEAEB2',
 				'ios-gray-3': '#C7C7CC',
@@ -51,8 +60,13 @@ export default {
 				'ios-secondary-bg': '#FFFFFF',
 				'ios-tertiary-bg': '#F2F2F7',
 				
-				// iOS Labels
+				// iOS Labels with proper contrast
 				'ios-label': '#000000',
+				'ios-label-on-blue': '#FFFFFF',
+				'ios-label-on-purple': '#FFFFFF',
+				'ios-label-on-green': '#FFFFFF',
+				'ios-label-on-red': '#FFFFFF',
+				'ios-label-on-orange': '#FFFFFF',
 				'ios-secondary-label': '#3C3C43',
 				'ios-tertiary-label': 'rgba(60, 60, 67, 0.6)',
 				'ios-quaternary-label': 'rgba(60, 60, 67, 0.3)',
@@ -123,11 +137,13 @@ export default {
 				}
 			},
 			borderRadius: {
+				'ios-xs': '4px',
 				'ios-sm': '8px',
 				'ios-md': '12px',
 				'ios-lg': '16px',
 				'ios-xl': '20px',
 				'ios-2xl': '24px',
+				'ios-3xl': '28px',
 				lg: '12px',
 				md: '8px',
 				sm: '6px'
@@ -146,6 +162,7 @@ export default {
 			},
 			spacing: {
 				// iOS 8px grid system
+				'ios-2xs': '2px',
 				'ios-xs': '4px',
 				'ios-sm': '8px',
 				'ios-md': '16px',
@@ -153,16 +170,23 @@ export default {
 				'ios-xl': '32px',
 				'ios-2xl': '40px',
 				'ios-3xl': '48px',
+				'ios-4xl': '56px',
+				'ios-5xl': '64px',
 			},
 			boxShadow: {
 				// iOS-style shadows
+				'ios-xs': '0 1px 2px rgba(0, 0, 0, 0.05)',
 				'ios-sm': '0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)',
 				'ios-md': '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)',
 				'ios-lg': '0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)',
 				'ios-xl': '0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04)',
+				'ios-2xl': '0 25px 50px rgba(0, 0, 0, 0.25)',
 			},
 			backdropBlur: {
 				'ios': '20px',
+				'ios-sm': '8px',
+				'ios-md': '16px',
+				'ios-lg': '24px',
 			},
 			keyframes: {
 				// iOS-style animations
@@ -179,16 +203,31 @@ export default {
 					'0%': { transform: 'translateY(100%)' },
 					'100%': { transform: 'translateY(0)' }
 				},
+				'ios-slide-in-right': {
+					'0%': { transform: 'translateX(100%)', opacity: '0' },
+					'100%': { transform: 'translateX(0)', opacity: '1' }
+				},
 				'ios-bounce': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-4px)' }
+				},
+				'toast-slide-in': {
+					'0%': { transform: 'translateX(100%)', opacity: '0' },
+					'100%': { transform: 'translateX(0)', opacity: '1' }
+				},
+				'toast-slide-out': {
+					'0%': { transform: 'translateX(0)', opacity: '1' },
+					'100%': { transform: 'translateX(100%)', opacity: '0' }
 				}
 			},
 			animation: {
 				'ios-spring': 'ios-spring 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
 				'ios-fade-in': 'ios-fade-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
 				'ios-slide-up': 'ios-slide-up 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-				'ios-bounce': 'ios-bounce 2s infinite'
+				'ios-slide-in-right': 'ios-slide-in-right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+				'ios-bounce': 'ios-bounce 2s infinite',
+				'toast-slide-in': 'toast-slide-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+				'toast-slide-out': 'toast-slide-out 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 			}
 		}
 	},

@@ -1,195 +1,243 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React, { useState } from 'react';
+import { Plus, Search, Filter, Sparkles, Users, Link as LinkIcon, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { useMeetings } from '@/hooks/useMeetings';
-import { MeetLink } from '@/services/meetLinksService';
-import MeetingTabs from '@/components/meetings/MeetingTabs';
-import MeetingFilters from '@/components/meetings/MeetingFilters';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import MeetingCard from '@/components/meetings/MeetingCard';
+import MeetingForm from '@/components/meetings/MeetingForm';
+import EditLinkModal from '@/components/EditLinkModal';
+import MeetingFilters from '@/components/meetings/MeetingFilters';
 import EmptyState from '@/components/meetings/EmptyState';
 import LoadingSkeleton from '@/components/meetings/LoadingSkeleton';
-import MeetingForm from '@/components/meetings/MeetingForm';
-import AuthPromptDialog from '@/components/meetings/AuthPromptDialog';
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerTitle 
-} from '@/components/ui/drawer';
+import { MeetLink } from '@/services/meetLinksService';
+import { useAnimatedToast } from '@/components/ui/toast-container';
 
-const Home: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+const Home = () => {
   const { t, isRTL } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showForm, setShowForm] = useState(false);
-  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const { user } = useAuth();
+  const { showToast } = useAnimatedToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingLink, setEditingLink] = useState<MeetLink | null>(null);
+  const [selectedCreator, setSelectedCreator] = useState<string>('');
 
   const {
-    links,
-    filteredLinks,
-    setFilteredLinks,
+    data: meetings = [],
     isLoading,
-    isSubmitting,
-    handleSubmit,
-    handleUpdateLink,
-    handleDelete,
-    checkCanEdit
+    createMeeting,
+    updateMeeting,
+    deleteMeeting
   } = useMeetings();
 
-  // Filter links based on active tab and search/category filters
-  useEffect(() => {
-    let filtered = links;
+  const filteredMeetings = meetings.filter(meeting => {
+    const matchesSearch = meeting.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         meeting.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (meeting.notes && meeting.notes.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCreator = !selectedCreator || meeting.creator === selectedCreator;
+    return matchesSearch && matchesCreator;
+  });
 
-    // Filter by tab
-    if (activeTab === 'my' && isAuthenticated) {
-      filtered = filtered.filter(link => checkCanEdit(link));
-    }
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(link =>
-        link.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        link.creator.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        link.notes?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by category (if we add categories later)
-    if (selectedCategory !== 'all') {
-      // This can be extended when categories are added
-    }
-
-    setFilteredLinks(filtered);
-  }, [links, activeTab, searchTerm, selectedCategory, isAuthenticated, checkCanEdit, setFilteredLinks]);
-
-  const handleAddMeeting = () => {
-    if (!isAuthenticated) {
-      setShowAuthPrompt(true);
-      return;
-    }
-    setShowForm(true);
-  };
-
-  const handleFormSubmit = async (meetingData: any) => {
-    console.log('Form data received:', meetingData);
+  const handleCreateMeeting = async (meetingData: any) => {
     try {
-      await handleSubmit(meetingData);
-      setShowForm(false);
+      await createMeeting.mutateAsync(meetingData);
+      setIsCreating(false);
+      showToast({
+        title: "Meeting Created",
+        description: "Your meeting has been successfully created and is ready to share",
+        variant: "success",
+        duration: 4000
+      });
     } catch (error) {
-      console.error('Error submitting form:', error);
-      // Error handling is done in the hook
+      showToast({
+        title: "Creation Failed",
+        description: "Failed to create meeting. Please try again.",
+        variant: "error",
+        duration: 4000
+      });
     }
   };
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as 'all' | 'my');
+  const handleUpdateMeeting = async (meetingData: any) => {
+    if (!editingLink) return;
+    
+    try {
+      await updateMeeting.mutateAsync({ id: editingLink.id, ...meetingData });
+      setEditingLink(null);
+      showToast({
+        title: "Meeting Updated",
+        description: "Your meeting details have been successfully updated",
+        variant: "success",
+        duration: 4000
+      });
+    } catch (error) {
+      showToast({
+        title: "Update Failed", 
+        description: "Failed to update meeting. Please try again.",
+        variant: "error",
+        duration: 4000
+      });
+    }
   };
 
-  const handleEditLink = (link: MeetLink) => {
-    // For now, just log - you can implement edit modal later
-    console.log('Edit link:', link);
+  const handleDeleteMeeting = async (id: string) => {
+    try {
+      await deleteMeeting.mutateAsync(id);
+      showToast({
+        title: "Meeting Deleted",
+        description: "The meeting has been permanently removed",
+        variant: "info",
+        duration: 3000
+      });
+    } catch (error) {
+      showToast({
+        title: "Deletion Failed",
+        description: "Failed to delete meeting. Please try again.",
+        variant: "error",
+        duration: 4000
+      });
+    }
   };
 
-  const handleAuthPromptLogin = () => {
-    setShowAuthPrompt(false);
-    // Navigate to auth page or show auth modal
-    window.location.href = '/auth';
-  };
+  const heroStats = [
+    { icon: Users, label: t('meetings.activeUsers'), value: '1.2K+', color: 'ios-blue' },
+    { icon: LinkIcon, label: t('meetings.totalMeetings'), value: '5.8K+', color: 'ios-green' },
+    { icon: Calendar, label: t('meetings.thisMonth'), value: '342', color: 'ios-purple' }
+  ];
 
   return (
     <div className={`min-h-screen bg-ios-system-bg ${isRTL ? 'rtl' : 'ltr'}`}>
-      <div className="max-w-7xl mx-auto px-ios-md py-ios-lg space-y-ios-lg">
-        {/* iOS-Style Hero Section */}
-        <div className="text-center space-y-ios-md py-ios-xl">
-          <div className="inline-flex items-center justify-center p-ios-md bg-gradient-to-br from-ios-blue/10 to-ios-purple/10 rounded-ios-xl mb-ios-md ios-spring">
-            <div className="w-16 h-16 bg-gradient-to-br from-ios-blue to-ios-purple rounded-ios-lg flex items-center justify-center shadow-ios-md">
-              <div className="w-8 h-8 bg-white rounded-ios-md flex items-center justify-center">
-                <div className="w-4 h-4 bg-ios-blue rounded-ios-sm"></div>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-ios-blue/10 via-ios-purple/10 to-ios-pink/10"></div>
+        <div className="relative container py-ios-2xl">
+          <div className="text-center space-y-ios-lg max-w-4xl mx-auto">
+            <div className="space-y-ios-md">
+              <div className="inline-flex items-center gap-2 bg-ios-secondary-bg/80 backdrop-blur-sm rounded-full px-ios-md py-ios-sm border border-ios-gray-4/50 shadow-ios-sm">
+                <Sparkles className="h-4 w-4 text-ios-blue" />
+                <span className="ios-text-footnote font-semibold text-ios-secondary-label">
+                  {t('meetings.welcomeBack')} {user?.username}
+                </span>
               </div>
+              
+              <h1 className="ios-text-title-1 font-bold text-ios-label leading-tight">
+                {t('meetings.heroTitle')}
+              </h1>
+              
+              <p className="ios-text-body text-ios-secondary-label max-w-2xl mx-auto leading-relaxed">
+                {t('meetings.heroSubtitle')}
+              </p>
             </div>
-          </div>
-          <h1 className="ios-text-title-1 bg-gradient-to-r from-ios-blue via-ios-purple to-ios-blue bg-clip-text text-transparent animate-ios-fade-in">
-            {t('app.name')}
-          </h1>
-          <p className="ios-text-body text-ios-secondary-label max-w-2xl mx-auto leading-relaxed">
-            {t('app.description')}
-          </p>
-        </div>
 
-        {/* iOS-Style Navigation Tabs */}
-        <div className="ios-card ios-spring">
-          <MeetingTabs 
-            activeTab={activeTab} 
-            onTabChange={handleTabChange}
-            isAuthenticated={isAuthenticated}
-          />
-        </div>
-
-        {/* iOS-Style Filters */}
-        <div className="ios-card ios-spring">
-          <div className="p-ios-md">
-            <MeetingFilters
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="min-h-[400px]">
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : filteredLinks.length === 0 ? (
-            <div className="ios-card-elevated p-ios-xl">
-              <EmptyState 
-                searchTerm={searchTerm}
-                onAddMeeting={handleAddMeeting}
-                isAuthenticated={isAuthenticated}
-              />
-            </div>
-          ) : (
-            <div className="grid gap-ios-md sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filteredLinks.map((link) => (
-                <div key={link.id} className="ios-spring ios-hover-scale">
-                  <MeetingCard
-                    link={link}
-                    onEdit={handleEditLink}
-                    onDelete={handleDelete}
-                    showActions={checkCanEdit(link)}
-                    onAddMeeting={handleAddMeeting}
-                  />
-                </div>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-ios-md max-w-2xl mx-auto">
+              {heroStats.map((stat, index) => (
+                <Card key={index} className="bg-ios-secondary-bg/60 backdrop-blur-sm border border-ios-gray-5/50 rounded-ios-xl shadow-ios-sm hover:shadow-ios-md transition-all duration-300">
+                  <CardContent className="p-ios-md text-center">
+                    <div className={`w-10 h-10 bg-${stat.color}/10 rounded-ios-lg flex items-center justify-center mx-auto mb-ios-sm`}>
+                      <stat.icon className={`h-5 w-5 text-${stat.color}`} />
+                    </div>
+                    <div className="ios-text-title-3 font-bold text-ios-label">{stat.value}</div>
+                    <div className="ios-text-caption text-ios-secondary-label">{stat.label}</div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          )}
+
+            {/* Quick Actions */}
+            <div className="flex flex-col sm:flex-row gap-ios-sm justify-center">
+              <Button
+                onClick={() => setIsCreating(true)}
+                className="bg-ios-blue hover:bg-ios-blue-dark text-ios-label-on-blue rounded-ios-lg px-ios-lg py-ios-md font-semibold shadow-ios-md hover:shadow-ios-lg transition-all duration-200 ios-spring"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                {t('meetings.createNew')}
+              </Button>
+              
+              <Button
+                onClick={() => setShowFilters(!showFilters)}
+                variant="outline"
+                className="bg-ios-secondary-bg/80 hover:bg-ios-gray-6 text-ios-label border-ios-gray-4 rounded-ios-lg px-ios-lg py-ios-md font-semibold transition-all duration-200 ios-spring"
+              >
+                <Filter className="h-5 w-5 mr-2" />
+                {t('meetings.filters')}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* iOS-Style Drawer */}
-      <Drawer open={showForm} onOpenChange={setShowForm}>
-        <DrawerContent className="max-w-3xl mx-auto bg-ios-secondary-bg rounded-t-ios-xl border-0 shadow-ios-xl">
-          <DrawerHeader className="bg-gradient-to-r from-ios-blue/5 to-ios-purple/5 rounded-t-ios-xl border-b border-ios-gray-5 p-ios-lg">
-            <DrawerTitle className={`ios-text-title-2 text-ios-label ${isRTL ? 'text-right' : 'text-left'}`}>
-              {t('meetings.addNew')}
-            </DrawerTitle>
-          </DrawerHeader>
-          <div className="p-ios-lg">
-            <MeetingForm
-              onSubmit={handleFormSubmit}
-              isSubmitting={isSubmitting}
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
+      {/* Main Content */}
+      <div className="container py-ios-lg space-y-ios-lg">
+        {/* Search and Filters */}
+        <Card className="bg-ios-secondary-bg rounded-ios-xl shadow-ios-md border border-ios-gray-5/50">
+          <CardContent className="p-ios-lg space-y-ios-md">
+            <div className="flex flex-col sm:flex-row gap-ios-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-ios-sm top-1/2 transform -translate-y-1/2 h-5 w-5 text-ios-gray" />
+                <Input
+                  placeholder={t('meetings.searchPlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 bg-ios-gray-6 border-ios-gray-4 rounded-ios-lg ios-text-body focus:border-ios-blue focus:ring-ios-blue/20"
+                />
+              </div>
+            </div>
 
-      {/* Auth Prompt Dialog */}
-      <AuthPromptDialog 
-        isOpen={showAuthPrompt}
-        onClose={() => setShowAuthPrompt(false)}
-      />
+            {showFilters && (
+              <div className="animate-ios-fade-in">
+                <MeetingFilters
+                  meetings={meetings}
+                  selectedCreator={selectedCreator}
+                  onCreatorChange={setSelectedCreator}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Meetings Grid */}
+        {isLoading ? (
+          <LoadingSkeleton />
+        ) : filteredMeetings.length === 0 ? (
+          <EmptyState onAddMeeting={() => setIsCreating(true)} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-ios-md">
+            {filteredMeetings.map((meeting) => (
+              <MeetingCard
+                key={meeting.id}
+                link={meeting}
+                onEdit={setEditingLink}
+                onDelete={handleDeleteMeeting}
+                showActions={meeting.creator_id === user?.id}
+                onAddMeeting={() => setIsCreating(true)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {isCreating && (
+        <MeetingForm
+          onSubmit={handleCreateMeeting}
+          onCancel={() => setIsCreating(false)}
+          isLoading={createMeeting.isPending}
+        />
+      )}
+
+      {editingLink && (
+        <EditLinkModal
+          link={editingLink}
+          onSave={handleUpdateMeeting}
+          onCancel={() => setEditingLink(null)}
+          isLoading={updateMeeting.isPending}
+        />
+      )}
     </div>
   );
 };

@@ -5,15 +5,25 @@
 @tailwind utilities;
 
 :root {
-  /* iOS Color Variables */
+  /* iOS Color Variables with proper contrast */
   --ios-blue: #007AFF;
+  --ios-blue-dark: #0056CC;
   --ios-purple: #AF52DE;
+  --ios-purple-dark: #8A42B2;
   --ios-green: #34C759;
+  --ios-green-dark: #2BA946;
   --ios-red: #FF3B30;
+  --ios-red-dark: #CC2E24;
   --ios-orange: #FF9500;
+  --ios-orange-dark: #CC7700;
   --ios-system-bg: #F2F2F7;
   --ios-secondary-bg: #FFFFFF;
   --ios-label: #000000;
+  --ios-label-on-blue: #FFFFFF;
+  --ios-label-on-purple: #FFFFFF;
+  --ios-label-on-green: #FFFFFF;
+  --ios-label-on-red: #FFFFFF;
+  --ios-label-on-orange: #FFFFFF;
   --ios-secondary-label: #3C3C43;
   
   /* System Variables */
@@ -43,61 +53,65 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* iOS Button Styles */
+/* iOS Button Styles with proper contrast */
 .ios-button {
-  @apply rounded-ios-md px-ios-md py-ios-sm font-medium transition-all duration-200 active:scale-95;
+  @apply rounded-ios-lg px-ios-md py-ios-sm font-semibold transition-all duration-200 active:scale-95 shadow-ios-sm;
 }
 
 .ios-button-primary {
-  @apply ios-button bg-ios-blue text-white shadow-ios-sm hover:bg-blue-600 active:bg-blue-700;
+  @apply ios-button bg-ios-blue text-ios-label-on-blue hover:bg-ios-blue-dark hover:shadow-ios-md;
 }
 
 .ios-button-secondary {
-  @apply ios-button bg-ios-gray-6 text-ios-label hover:bg-ios-gray-5 active:bg-ios-gray-4;
+  @apply ios-button bg-ios-gray-6 text-ios-label hover:bg-ios-gray-5 border border-ios-gray-4;
 }
 
 .ios-button-destructive {
-  @apply ios-button bg-ios-red text-white hover:bg-red-600 active:bg-red-700;
+  @apply ios-button bg-ios-red text-ios-label-on-red hover:bg-ios-red-dark hover:shadow-ios-md;
+}
+
+.ios-button-success {
+  @apply ios-button bg-ios-green text-ios-label-on-green hover:bg-ios-green-dark hover:shadow-ios-md;
 }
 
 /* iOS Card Styles */
 .ios-card {
-  @apply bg-ios-secondary-bg rounded-ios-lg shadow-ios-md border border-ios-gray-5 backdrop-blur-ios;
+  @apply bg-ios-secondary-bg rounded-ios-xl shadow-ios-md border border-ios-gray-5/50 backdrop-blur-ios;
 }
 
 .ios-card-elevated {
-  @apply ios-card shadow-ios-lg;
+  @apply ios-card shadow-ios-lg hover:shadow-ios-xl transition-shadow duration-300;
 }
 
 /* iOS Form Styles */
 .ios-input {
-  @apply w-full px-ios-md py-ios-sm rounded-ios-md border border-ios-gray-4 bg-ios-secondary-bg text-ios-label placeholder-ios-gray transition-all duration-200 focus:border-ios-blue focus:ring-2 focus:ring-ios-blue focus:ring-opacity-20 focus:outline-none;
+  @apply w-full px-ios-md py-ios-sm rounded-ios-lg border border-ios-gray-4 bg-ios-secondary-bg text-ios-label placeholder-ios-gray transition-all duration-200 focus:border-ios-blue focus:ring-2 focus:ring-ios-blue/20 focus:outline-none;
 }
 
 .ios-label {
-  @apply text-ios-footnote font-medium text-ios-secondary-label mb-ios-xs;
+  @apply ios-text-footnote font-semibold text-ios-secondary-label mb-ios-xs;
 }
 
 /* iOS List Styles */
 .ios-list {
-  @apply bg-ios-secondary-bg rounded-ios-lg overflow-hidden shadow-ios-sm;
+  @apply bg-ios-secondary-bg rounded-ios-xl overflow-hidden shadow-ios-sm border border-ios-gray-5/50;
 }
 
 .ios-list-item {
-  @apply px-ios-md py-ios-sm border-b border-ios-gray-5 last:border-b-0 hover:bg-ios-gray-6 transition-colors duration-150 active:bg-ios-gray-5;
+  @apply px-ios-md py-ios-sm border-b border-ios-gray-5/50 last:border-b-0 hover:bg-ios-gray-6/50 transition-colors duration-150 active:bg-ios-gray-5;
 }
 
 /* iOS Navigation Styles */
 .ios-nav {
-  @apply bg-ios-secondary-bg/80 backdrop-blur-ios border-b border-ios-gray-5 sticky top-0 z-50;
+  @apply bg-ios-secondary-bg/80 backdrop-blur-ios border-b border-ios-gray-5/50 sticky top-0 z-50;
 }
 
 .ios-nav-item {
-  @apply px-ios-md py-ios-sm rounded-ios-md text-ios-body font-medium text-ios-secondary-label hover:text-ios-label hover:bg-ios-gray-6 transition-all duration-200 active:scale-95;
+  @apply px-ios-md py-ios-sm rounded-ios-lg ios-text-body font-semibold text-ios-secondary-label hover:text-ios-label hover:bg-ios-gray-6/50 transition-all duration-200 active:scale-95;
 }
 
 .ios-nav-item-active {
-  @apply ios-nav-item bg-ios-blue text-white hover:bg-blue-600;
+  @apply ios-nav-item bg-ios-blue text-ios-label-on-blue hover:bg-ios-blue-dark shadow-ios-sm;
 }
 
 /* iOS Gradient Backgrounds */
@@ -119,11 +133,11 @@ body {
 
 /* iOS Glass Effect */
 .ios-glass {
-  @apply bg-white/80 backdrop-blur-ios border border-white/20;
+  @apply bg-white/80 backdrop-blur-ios border border-white/20 shadow-ios-md;
 }
 
 .ios-glass-dark {
-  @apply bg-black/20 backdrop-blur-ios border border-white/10 text-white;
+  @apply bg-black/20 backdrop-blur-ios border border-white/10 text-white shadow-ios-md;
 }
 
 /* iOS Spring Animation */
@@ -219,12 +233,12 @@ body {
 
 ::-webkit-scrollbar-track {
   background: var(--ios-gray-6);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--ios-gray-3);
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid var(--ios-gray-4);
 }
 
@@ -238,9 +252,64 @@ body {
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2);
 }
 
+/* Text contrast utilities */
+.text-on-blue {
+  color: var(--ios-label-on-blue) !important;
+}
+
+.text-on-green {
+  color: var(--ios-label-on-green) !important;
+}
+
+.text-on-red {
+  color: var(--ios-label-on-red) !important;
+}
+
+.text-on-orange {
+  color: var(--ios-label-on-orange) !important;
+}
+
+.text-on-purple {
+  color: var(--ios-label-on-purple) !important;
+}
+
+/* Animation utilities */
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s infinite;
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Toast animations */
+.toast-enter {
+  animation: toast-slide-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.toast-exit {
+  animation: toast-slide-out 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* Print Styles */
 @media print {
   .no-print {
     display: none !important;
   }
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

@@ -91,6 +91,7 @@ export type Database = {
           id: string
           last_login: string | null
           password_clicks: Json
+          profile_image_url: string | null
           session_expires_at: string | null
           username: string
         }
@@ -99,6 +100,7 @@ export type Database = {
           id?: string
           last_login?: string | null
           password_clicks?: Json
+          profile_image_url?: string | null
           session_expires_at?: string | null
           username: string
         }
@@ -107,6 +109,7 @@ export type Database = {
           id?: string
           last_login?: string | null
           password_clicks?: Json
+          profile_image_url?: string | null
           session_expires_at?: string | null
           username?: string
         }
