@@ -10,6 +10,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import ProfilePictureUpload from '@/components/profile/ProfilePictureUpload';
 import { useAnimatedToast } from '@/components/ui/toast-container';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import AppSidebar from '@/components/AppSidebar';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -85,7 +87,14 @@ const Profile = () => {
   ];
 
   return (
-    <div className={`min-h-screen bg-ios-system-bg pb-20 md:pb-0 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <SidebarProvider>
+      <div className={`min-h-screen w-full flex bg-ios-system-bg ${isRTL ? 'rtl' : 'ltr'}`}>
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <div className="min-h-screen bg-ios-system-bg pb-20 md:pb-0">
       {/* iOS-Style Header */}
       <div className="ios-nav bg-ios-secondary-bg/80 backdrop-blur-ios border-b border-ios-gray-5 sticky top-0 z-40">
         <div className="container py-ios-lg">
@@ -308,8 +317,11 @@ const Profile = () => {
             </TabsContent>
           </Tabs>
         </Card>
+          </div>
+        </div>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

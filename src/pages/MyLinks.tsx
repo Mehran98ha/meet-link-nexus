@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import EditLinkModal from '@/components/EditLinkModal';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import AppSidebar from '@/components/AppSidebar';
 
 const MyLinks = () => {
   const [links, setLinks] = useState<MeetLink[]>([]);
@@ -119,7 +121,14 @@ const MyLinks = () => {
   };
 
   return (
-    <div className="pb-20 md:pb-0">
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <div className="pb-20 md:pb-0">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container py-6">
@@ -254,7 +263,10 @@ const MyLinks = () => {
         onSave={handleUpdateLink}
         isLoading={isUpdating}
       />
-    </div>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 

@@ -3,13 +3,22 @@ import React from 'react';
 import { Bookmark, ExternalLink } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import AppSidebar from '@/components/AppSidebar';
 
 const Saved = () => {
   // This is a placeholder component - in a real implementation, we would have a backend system
   // for users to save/bookmark links they want to access frequently.
   
   return (
-    <div className="pb-20 md:pb-0">
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <div className="pb-20 md:pb-0">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container py-6">
@@ -75,7 +84,10 @@ const Saved = () => {
           </div>
         </div>
       </div>
-    </div>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 

@@ -31,7 +31,7 @@ const AppSidebar: React.FC = () => {
   const navigationItems = [
     { 
       title: t('nav.browseMeetings'), 
-      path: '/', 
+      path: '/home', 
       icon: Home 
     },
     { 
@@ -61,8 +61,8 @@ const AppSidebar: React.FC = () => {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/') {
-      return location.pathname === path;
+    if (path === '/home') {
+      return location.pathname === path || location.pathname === '/';
     }
     return location.pathname.startsWith(path);
   };
