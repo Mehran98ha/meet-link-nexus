@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  updateProfileImage: (imageUrl: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -45,13 +46,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const updateProfileImage = (imageUrl: string) => {
+    if (user) {
+      setUser({ ...user, profile_image_url: imageUrl });
+    }
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
     login,
     logout,
-    refreshAuth
+    refreshAuth,
+    updateProfileImage
   };
 
   return (

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useAnimatedToast } from '@/components/ui/toast-container';
+import AvatarFallback from './AvatarFallback';
 
 interface ProfilePictureUploadProps {
   currentImageUrl?: string;
@@ -15,7 +16,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
   currentImageUrl,
   onImageUpdate
 }) => {
-  const { user } = useAuth();
+  const { user, updateProfileImage } = useAuth();
   const { showToast } = useAnimatedToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -47,15 +48,39 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
       return;
     }
 
-    // Show preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
+    // Validate image dimensions
+    const img = new Image();
+    img.onload = () => {
+      if (img.width < 100 || img.height < 100) {
+        showToast({
+          title: "Image Too Small",
+          description: "Please select an image at least 100x100 pixels",
+          variant: "error",
+          duration: 4000
+        });
+        return;
+      }
+      
+      // Show preview and upload
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      uploadFile(file);
     };
-    reader.readAsDataURL(file);
+    
+    img.onerror = () => {
+      showToast({
+        title: "Invalid Image",
+        description: "Please select a valid image file",
+        variant: "error",
+        duration: 4000
+      });
+    };
+    
+    img.src = URL.createObjectURL(file);
 
-    // Upload file
-    uploadFile(file);
   };
 
   const uploadFile = async (file: File) => {
@@ -99,7 +124,9 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
       if (updateError) throw updateError;
 
+      // Update both local state and auth context
       onImageUpdate(publicUrl);
+      updateProfileImage(publicUrl);
       setPreviewUrl(null);
 
       showToast({
@@ -144,7 +171,9 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
       if (error) throw error;
 
+      // Update both local state and auth context
       onImageUpdate('');
+      updateProfileImage('');
 
       showToast({
         title: "Profile Picture Removed",
@@ -169,10 +198,10 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
   const displayUrl = previewUrl || currentImageUrl;
 
   return (
-    <div className="flex flex-col items-center space-y-ios-md">
+    <div className="flex flex-col items-center space-y-4">
       {/* Profile Picture Display */}
       <div className="relative">
-        <div className="w-32 h-32 rounded-ios-2xl bg-gradient-to-br from-ios-blue/20 to-ios-purple/20 flex items-center justify-center overflow-hidden shadow-ios-lg border-4 border-ios-gray-6">
+        <div className="relative w-32 h-32 rounded-2xl overflow-hidden shadow-lg border-4 border-gray-200">
           {displayUrl ? (
             <img
               src={displayUrl}
@@ -180,13 +209,13 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
               className="w-full h-full object-cover"
             />
           ) : (
-            <Camera className="w-12 h-12 text-ios-gray" />
+            <AvatarFallback username={user?.username} size="lg" className="w-full h-full rounded-none border-0" />
           )}
         </div>
 
         {/* Loading Overlay */}
         {isUploading && (
-          <div className="absolute inset-0 bg-black/50 rounded-ios-2xl flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-3 border-white border-t-transparent"></div>
           </div>
         )}
@@ -195,7 +224,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         {currentImageUrl && !isUploading && (
           <button
             onClick={handleRemoveImage}
-            className="absolute -top-2 -right-2 w-8 h-8 bg-ios-red hover:bg-ios-red-dark text-white rounded-full flex items-center justify-center shadow-ios-md transition-all duration-200 hover:scale-110"
+            className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
           >
             <X className="w-4 h-4" />
           </button>
@@ -203,18 +232,18 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
       </div>
 
       {/* Upload Button */}
-      <div className="flex flex-col items-center space-y-ios-sm">
+      <div className="flex flex-col items-center space-y-3">
         <Button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="bg-gradient-to-r from-ios-blue to-ios-purple hover:from-ios-blue-dark hover:to-ios-purple-dark text-white px-ios-lg py-ios-md rounded-ios-lg font-semibold shadow-ios-md hover:shadow-ios-lg transition-all duration-200 transform hover:scale-105"
+          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
         >
           <Upload className="w-4 h-4 mr-2" />
           {currentImageUrl ? 'Change Picture' : 'Upload Picture'}
         </Button>
 
-        <p className="ios-text-caption text-ios-secondary-label text-center">
-          JPG, PNG up to 5MB
+        <p className="text-sm text-gray-500 text-center">
+          JPG, PNG up to 5MB • Min 100x100px
         </p>
       </div>
 

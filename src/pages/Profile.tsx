@@ -19,45 +19,16 @@ const Profile = () => {
   const { showToast } = useAnimatedToast();
   const { t, isRTL } = useLanguage();
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   
   useEffect(() => {
-    if (user) {
-      fetchUserProfile();
+    if (user?.profile_image_url) {
+      setProfileImageUrl(user.profile_image_url);
     }
   }, [user]);
 
-  const fetchUserProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('profile_image_url')
-        .eq('id', user?.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      if (data?.profile_image_url) {
-        setProfileImageUrl(data.profile_image_url);
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
-
   const handleImageUpdate = (newImageUrl: string) => {
     setProfileImageUrl(newImageUrl);
-    showToast({
-      title: "Profile Updated",
-      description: "Your profile picture has been successfully updated",
-      variant: "success",
-      duration: 4000
-    });
   };
   
   const handleLogout = async () => {
@@ -123,16 +94,10 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row gap-ios-lg items-center sm:items-start">
                 {/* Profile Picture Upload */}
                 <div className="flex-shrink-0">
-                  {isLoadingProfile ? (
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-ios-2xl bg-ios-gray-5 animate-pulse flex items-center justify-center">
-                      <UserCircle className="h-16 w-16 text-ios-gray" />
-                    </div>
-                  ) : (
-                    <ProfilePictureUpload
-                      currentImageUrl={profileImageUrl || undefined}
-                      onImageUpdate={handleImageUpdate}
-                    />
-                  )}
+                  <ProfilePictureUpload
+                    currentImageUrl={profileImageUrl || undefined}
+                    onImageUpdate={handleImageUpdate}
+                  />
                 </div>
                 
                 {/* Profile Info */}

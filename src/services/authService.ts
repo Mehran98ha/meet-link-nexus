@@ -5,6 +5,7 @@ export interface User {
   username: string;
   created_at: string;
   last_login?: string;
+  profile_image_url?: string;
 }
 
 export interface PasswordClick {
@@ -84,7 +85,8 @@ export const registerUser = async (username: string, passwordClicks: PasswordCli
         id: user.id,
         username: user.username,
         created_at: user.created_at,
-        last_login: user.last_login
+        last_login: user.last_login,
+        profile_image_url: user.profile_image_url
       },
       sessionToken 
     };
@@ -161,7 +163,8 @@ export const loginUser = async (username: string, passwordClicks: PasswordClick[
         id: user.id,
         username: user.username,
         created_at: user.created_at,
-        last_login: user.last_login
+        last_login: user.last_login,
+        profile_image_url: user.profile_image_url
       },
       sessionToken 
     };
@@ -245,7 +248,7 @@ export const checkAuth = async (): Promise<{ isAuthenticated: boolean; user?: Us
     // Get user data
     const { data: user } = await supabase
       .from('users')
-      .select('id, username, created_at, last_login')
+      .select('id, username, created_at, last_login, profile_image_url')
       .eq('id', userId)
       .single();
 
@@ -259,7 +262,8 @@ export const checkAuth = async (): Promise<{ isAuthenticated: boolean; user?: Us
         id: user.id,
         username: user.username,
         created_at: user.created_at,
-        last_login: user.last_login
+        last_login: user.last_login,
+        profile_image_url: user.profile_image_url
       }
     };
 
