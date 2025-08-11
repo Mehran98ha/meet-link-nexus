@@ -116,13 +116,13 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
         .from('profile-images')
         .getPublicUrl(fileName);
 
-      // Update user profile
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ profile_image_url: publicUrl })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
+      // Update user profile using secure function
+      const { updateUserProfileImage } = await import('@/services/authService');
+      const updateResult = await updateUserProfileImage(user.id, publicUrl);
+      
+      if (!updateResult.success) {
+        throw new Error(updateResult.error || 'Failed to update profile');
+      }
 
       // Update both local state and auth context
       onImageUpdate(publicUrl);
@@ -163,13 +163,13 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
           .remove([`${user.id}/${path}`]);
       }
 
-      // Update user profile
-      const { error } = await supabase
-        .from('users')
-        .update({ profile_image_url: null })
-        .eq('id', user.id);
-
-      if (error) throw error;
+      // Update user profile using secure function
+      const { updateUserProfileImage } = await import('@/services/authService');
+      const updateResult = await updateUserProfileImage(user.id, null);
+      
+      if (!updateResult.success) {
+        throw new Error(updateResult.error || 'Failed to update profile');
+      }
 
       // Update both local state and auth context
       onImageUpdate('');
