@@ -122,12 +122,13 @@ export const loginUser = async (username: string, passwordClicks: PasswordClick[
  */
 export const updateUserProfileImage = async (userId: string, imageUrl: string | null): Promise<{ success: boolean; error?: string }> => {
   try {
-    const { error } = await supabase
-      .from('users')
-      .update({ profile_image_url: imageUrl })
-      .eq('id', userId);
+    const { data, error } = await supabase
+      .rpc('update_profile_image', {
+        p_user_id: userId,
+        p_image_url: imageUrl
+      });
     
-    if (error) {
+    if (error || !data) {
       console.error('Error updating profile image:', error);
       return { success: false, error: 'Failed to update profile image' };
     }

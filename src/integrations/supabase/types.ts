@@ -157,6 +157,10 @@ export type Database = {
           session_token: string
         }[]
       }
+      update_profile_image: {
+        Args: { p_user_id: string; p_image_url: string }
+        Returns: boolean
+      }
       verify_visual_clicks: {
         Args: { saved: Json; input: Json; tolerance?: number }
         Returns: boolean
