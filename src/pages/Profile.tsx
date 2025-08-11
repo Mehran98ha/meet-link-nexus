@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import ProfilePictureUpload from '@/components/profile/ProfilePictureUpload';
+import ChangeVisualPassword from '@/components/profile/ChangeVisualPassword';
 import { useAnimatedToast } from '@/components/ui/toast-container';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/AppSidebar';
@@ -20,6 +21,7 @@ const Profile = () => {
   const { t, isRTL } = useLanguage();
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   
   useEffect(() => {
     if (user?.profile_image_url) {
@@ -35,15 +37,15 @@ const Profile = () => {
     try {
       await logout();
       showToast({
-        title: "Logged Out",
-        description: "You have been successfully logged out",
+        title: t('profile.logout'),
+        description: t('common.success'),
         variant: "info",
         duration: 3000
       });
     } catch (error) {
       showToast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
+        title: t('common.error'),
+        description: t('error.serverError'),
         variant: "error",
         duration: 4000
       });
@@ -51,10 +53,10 @@ const Profile = () => {
   };
 
   const statsData = [
-    { icon: Activity, label: "Total Meetings", value: "12", color: "ios-blue", bgColor: "bg-ios-blue/10" },
-    { icon: Users, label: "Connections", value: "48", color: "ios-green", bgColor: "bg-ios-green/10" },
-    { icon: Link, label: "Shared Links", value: "8", color: "ios-purple", bgColor: "bg-ios-purple/10" },
-    { icon: Shield, label: "Security Score", value: "100%", color: "ios-orange", bgColor: "bg-ios-orange/10" }
+    { icon: Activity, label: t('profile.activity'), value: "12", color: "ios-blue", bgColor: "bg-ios-blue/10" },
+    { icon: Users, label: t('nav.joinMeetings'), value: "48", color: "ios-green", bgColor: "bg-ios-green/10" },
+    { icon: Link, label: t('nav.myLinks'), value: "8", color: "ios-purple", bgColor: "bg-ios-purple/10" },
+    { icon: Shield, label: t('profile.security'), value: "100%", color: "ios-orange", bgColor: "bg-ios-orange/10" }
   ];
 
   return (
@@ -71,15 +73,15 @@ const Profile = () => {
         <div className="container py-ios-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="ios-text-title-2 text-ios-label font-bold">Profile</h1>
-              <p className="ios-text-callout text-ios-secondary-label">Manage your account and preferences</p>
+              <h1 className="ios-text-title-2 text-ios-label font-bold">{t('profile.title')}</h1>
+              <p className="ios-text-callout text-ios-secondary-label">{t('profile.accountSettings')}</p>
             </div>
             <Button 
               onClick={handleLogout}
               className="bg-ios-red hover:bg-ios-red-dark text-ios-label-on-red rounded-ios-lg px-ios-md py-ios-sm font-semibold shadow-ios-sm transition-all duration-200 ios-spring"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Logout
+              {t('profile.logout')}
             </Button>
           </div>
         </div>
@@ -115,7 +117,7 @@ const Profile = () => {
                       {user?.created_at && (
                         <div className="inline-flex items-center gap-2 bg-ios-secondary-bg/80 backdrop-blur-sm rounded-ios-lg px-ios-sm py-ios-xs border border-ios-gray-4/50">
                           <span className="ios-text-footnote text-ios-secondary-label font-medium">
-                            Member since: {new Date(user.created_at).toLocaleDateString()}
+                            {t('profile.memberSince')}: {new Date(user.created_at).toLocaleDateString()}
                           </span>
                         </div>
                       )}
@@ -123,7 +125,7 @@ const Profile = () => {
 
                     {user?.last_login && (
                       <p className="ios-text-footnote text-ios-tertiary-label">
-                        Last login: {new Date(user.last_login).toLocaleDateString()}
+                        {t('profile.lastLogin')}: {new Date(user.last_login).toLocaleDateString()}
                       </p>
                     )}
                   </div>
@@ -131,11 +133,11 @@ const Profile = () => {
                   <div className="flex gap-ios-sm justify-center sm:justify-start mt-ios-md">
                     <Button className="bg-ios-blue hover:bg-ios-blue-dark text-ios-label-on-blue rounded-ios-lg px-ios-md py-ios-sm font-semibold shadow-ios-sm transition-all duration-200 ios-spring">
                       <Edit3 className="h-4 w-4 mr-2" />
-                      Edit Profile
+                      {t('profile.editProfile')}
                     </Button>
                     <Button className="bg-ios-secondary-bg hover:bg-ios-gray-6 text-ios-label rounded-ios-lg px-ios-md py-ios-sm font-semibold border border-ios-gray-4 transition-all duration-200 ios-spring">
                       <Shield className="h-4 w-4 mr-2" />
-                      Security
+                      {t('profile.security')}
                     </Button>
                   </div>
                 </div>
@@ -170,19 +172,19 @@ const Profile = () => {
                   value="activity" 
                   className="ios-text-callout font-semibold px-ios-md py-ios-sm rounded-ios-lg data-[state=active]:bg-ios-blue data-[state=active]:text-ios-label-on-blue data-[state=active]:shadow-ios-sm transition-all duration-200"
                 >
-                  Activity
+                  {t('profile.activity')}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="settings" 
                   className="ios-text-callout font-semibold px-ios-md py-ios-sm rounded-ios-lg data-[state=active]:bg-ios-blue data-[state=active]:text-ios-label-on-blue data-[state=active]:shadow-ios-sm transition-all duration-200"
                 >
-                  Settings
+                  {t('profile.settings')}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="invite" 
                   className="ios-text-callout font-semibold px-ios-md py-ios-sm rounded-ios-lg data-[state=active]:bg-ios-blue data-[state=active]:text-ios-label-on-blue data-[state=active]:shadow-ios-sm transition-all duration-200"
                 >
-                  Invite Friends
+                  {t('profile.inviteFriends')}
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -194,8 +196,8 @@ const Profile = () => {
                   <Activity className="h-8 w-8 text-ios-gray" />
                 </div>
                 <div className="space-y-ios-xs">
-                  <p className="ios-text-body text-ios-secondary-label font-medium">Your activity will appear here</p>
-                  <p className="ios-text-footnote text-ios-tertiary-label">Start sharing and joining meetings</p>
+                  <p className="ios-text-body text-ios-secondary-label font-medium">{t('profile.activityEmpty')}</p>
+                  <p className="ios-text-footnote text-ios-tertiary-label">{t('profile.activityEmptyDescription')}</p>
                 </div>
               </div>
             </TabsContent>
@@ -203,42 +205,68 @@ const Profile = () => {
             {/* Settings Tab */}
             <TabsContent value="settings" className="p-ios-lg">
               <div className="space-y-ios-lg">
-                <h3 className="ios-text-headline text-ios-label font-semibold">Account Settings</h3>
+                <h3 className="ios-text-headline text-ios-label font-semibold">{t('profile.accountSettings')}</h3>
                 
-                <div className="space-y-ios-xs">
-                  {[
-                    { icon: Shield, label: "Change Visual Password", color: "ios-blue" },
-                    { icon: Settings, label: "Privacy Settings", color: "ios-purple" },
-                    { icon: LogOut, label: "Logout", color: "ios-red", action: handleLogout }
-                  ].map((item, index) => (
-                    <button 
-                      key={index}
-                      onClick={item.action}
-                      className="w-full bg-ios-gray-6/50 hover:bg-ios-gray-6 rounded-ios-lg p-ios-md transition-all duration-200 ios-spring hover:scale-[1.02]"
+                {showChangePassword ? (
+                  <div className="space-y-ios-md">
+                    <Button
+                      onClick={() => setShowChangePassword(false)}
+                      variant="outline"
+                      className="mb-ios-md"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-ios-sm">
-                          <div className={`w-8 h-8 bg-${item.color}/10 rounded-ios-md flex items-center justify-center`}>
-                            <item.icon className={`h-4 w-4 text-${item.color}`} />
+                      {t('common.back')}
+                    </Button>
+                    <ChangeVisualPassword />
+                  </div>
+                ) : (
+                  <div className="space-y-ios-xs">
+                    {[
+                      { 
+                        icon: Shield, 
+                        label: t('password.changeVisualPassword'), 
+                        color: "ios-blue", 
+                        action: () => setShowChangePassword(true) 
+                      },
+                      { 
+                        icon: Settings, 
+                        label: t('profile.privacySettings'), 
+                        color: "ios-purple" 
+                      },
+                      { 
+                        icon: LogOut, 
+                        label: t('profile.logout'), 
+                        color: "ios-red", 
+                        action: handleLogout 
+                      }
+                    ].map((item, index) => (
+                      <button 
+                        key={index}
+                        onClick={item.action}
+                        className="w-full bg-ios-gray-6/50 hover:bg-ios-gray-6 rounded-ios-lg p-ios-md transition-all duration-200 ios-spring hover:scale-[1.02]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-ios-sm">
+                            <div className={`w-8 h-8 bg-${item.color}/10 rounded-ios-md flex items-center justify-center`}>
+                              <item.icon className={`h-4 w-4 text-${item.color}`} />
+                            </div>
+                            <span className={`ios-text-body font-medium ${item.color === 'ios-red' ? `text-${item.color}` : 'text-ios-label'}`}>
+                              {item.label}
+                            </span>
                           </div>
-                          <span className={`ios-text-body font-medium ${item.color === 'ios-red' ? `text-${item.color}` : 'text-ios-label'}`}>
-                            {item.label}
-                          </span>
+                          <div className="text-ios-gray-2 text-xl">›</div>
                         </div>
-                        <div className="text-ios-gray-2 text-xl">›</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <div className="bg-gradient-to-r from-ios-blue/10 to-ios-purple/10 p-ios-md rounded-ios-lg border border-ios-blue/20">
                   <div className="flex items-start gap-ios-sm">
                     <Shield className="h-5 w-5 text-ios-blue mt-1 flex-shrink-0" />
                     <div className="min-w-0">
-                      <h4 className="ios-text-callout font-semibold text-ios-label mb-ios-xs">Security</h4>
+                      <h4 className="ios-text-callout font-semibold text-ios-label mb-ios-xs">{t('profile.security')}</h4>
                       <p className="ios-text-footnote text-ios-secondary-label leading-relaxed">
-                        🔒 Your account is secured with visual password authentication. 
-                        Your click pattern is unique and encrypted.
+                        🔒 {t('profile.securityNote')}
                       </p>
                     </div>
                   </div>
@@ -253,28 +281,28 @@ const Profile = () => {
                   <Share2 className="h-8 w-8 text-ios-blue" />
                 </div>
                 <div className="space-y-ios-sm">
-                  <h3 className="ios-text-headline text-ios-label font-semibold">Invite Friends & Colleagues</h3>
-                  <p className="ios-text-callout text-ios-secondary-label">Share Meet Link Meetly with others</p>
+                  <h3 className="ios-text-headline text-ios-label font-semibold">{t('profile.inviteFriends')}</h3>
+                  <p className="ios-text-callout text-ios-secondary-label">{t('profile.inviteDescription')}</p>
                 </div>
                 
                 <div className="max-w-md mx-auto mt-ios-lg">
                   <div className="flex items-center bg-ios-gray-6 rounded-ios-lg overflow-hidden border border-ios-gray-4">
                     <input 
                       type="text" 
-                      value="https://meet-link-meetly.com/invite/xyz123" 
+                      value={t('profile.inviteLink')} 
                       readOnly
                       className="flex-1 px-ios-md py-ios-sm bg-transparent ios-text-subhead focus:outline-none text-ios-secondary-label"
                     />
                     <button 
                       className="px-ios-md py-ios-sm bg-ios-blue text-ios-label-on-blue ios-text-callout font-semibold hover:bg-ios-blue-dark transition-colors duration-200 ios-spring"
                       onClick={() => showToast({
-                        title: "Link Copied",
-                        description: "Invitation link copied to clipboard",
+                        title: t('profile.linkCopied'),
+                        description: t('profile.linkCopiedDescription'),
                         variant: "success",
                         duration: 3000
                       })}
                     >
-                      Copy
+                      {t('profile.copyInviteLink')}
                     </button>
                   </div>
                 </div>
