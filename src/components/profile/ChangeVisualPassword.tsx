@@ -129,13 +129,12 @@ const ChangeVisualPassword: React.FC = () => {
     setIsLoading(true);
     try {
       // Add secure RPC for password change
-      const { data, error } = await import('@/integrations/supabase/client').then(module => 
-        module.supabase.rpc('change_visual_password', {
-          p_user_id: user!.id,
-          p_current_clicks: currentPassword,
-          p_new_clicks: newPassword
-        })
-      );
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.rpc('change_visual_password', {
+        p_user_id: user!.id,
+        p_current_clicks: currentPassword as any,
+        p_new_clicks: newPassword as any
+      });
 
       if (error || !data) {
         throw new Error('Failed to change password');
@@ -273,15 +272,21 @@ const ChangeVisualPassword: React.FC = () => {
 
           <div className="flex justify-center">
             <VisualPasswordImage
-              onPasswordChange={
+              onClicksChange={
                 step === 'current' 
                   ? handleCurrentPasswordSubmit
                   : step === 'new'
                     ? handleNewPasswordSubmit
                     : handleConfirmPasswordSubmit
               }
-              isLoading={isLoading}
-              className="w-full max-w-sm"
+              clicks={
+                step === 'current' 
+                  ? currentPassword
+                  : step === 'new'
+                    ? newPassword
+                    : confirmPassword
+              }
+              isSetup={false}
             />
           </div>
         </div>

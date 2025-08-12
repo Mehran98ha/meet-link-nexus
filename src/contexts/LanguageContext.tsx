@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'fa';
@@ -127,7 +126,6 @@ const translations = {
     'profile.logout': 'Logout',
     'profile.memberSince': 'Member since',
     'profile.lastLogin': 'Last login',
-    'profile.editProfile': 'Edit Profile',
     'profile.security': 'Security',
     'profile.activityEmpty': 'Your activity will appear here',
     'profile.activityEmptyDescription': 'Start sharing and joining meetings',
@@ -298,7 +296,6 @@ const translations = {
     'profile.logout': 'خروج',
     'profile.memberSince': 'عضو از',
     'profile.lastLogin': 'آخرین ورود',
-    'profile.editProfile': 'ویرایش پروفایل',
     'profile.security': 'امنیت',
     'profile.activityEmpty': 'فعالیت شما اینجا نمایش داده خواهد شد',
     'profile.activityEmptyDescription': 'شروع به اشتراک‌گذاری و پیوستن به جلسات کنید',

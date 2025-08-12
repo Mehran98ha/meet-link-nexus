@@ -125,6 +125,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      change_visual_password: {
+        Args: { p_user_id: string; p_current_clicks: Json; p_new_clicks: Json }
+        Returns: boolean
+      }
       get_user_public: {
         Args: { p_user_id: string }
         Returns: {
