@@ -128,15 +128,23 @@ const ChangeVisualPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Add secure RPC for password change
+      // Use secure function for password change - direct call since types may not be updated yet
       const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.rpc('change_visual_password', {
-        p_user_id: user!.id,
-        p_current_clicks: currentPassword as any,
-        p_new_clicks: newPassword as any
+      const response = await fetch(`https://cqozxsdaptbjxiicjqat.supabase.co/rest/v1/rpc/change_visual_password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxb3p4c2RhcHRianhpaWNqcWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MDA3NzQsImV4cCI6MjA2NTA3Njc3NH0.VgQr8nAttOPsE4e6AU1C2X-qq3YboCi05UmpipgkgB4',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxb3p4c2RhcHRianhpaWNqcWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MDA3NzQsImV4cCI6MjA2NTA3Njc3NH0.VgQr8nAttOPsE4e6AU1C2X-qq3YboCi05UmpipgkgB4'
+        },
+        body: JSON.stringify({
+          p_user_id: user!.id,
+          p_current_clicks: currentPassword,
+          p_new_clicks: newPassword
+        })
       });
 
-      if (error || !data) {
+      if (!response.ok) {
         throw new Error('Failed to change password');
       }
 
@@ -272,13 +280,21 @@ const ChangeVisualPassword: React.FC = () => {
 
           <div className="flex justify-center">
             <VisualPasswordImage
-              onClicksChange={
-                step === 'current' 
-                  ? handleCurrentPasswordSubmit
-                  : step === 'new'
-                    ? handleNewPasswordSubmit
-                    : handleConfirmPasswordSubmit
-              }
+              onClicksChange={(clicks) => {
+                if (step === 'current') {
+                  if (clicks.length >= 3) {
+                    handleCurrentPasswordSubmit(clicks);
+                  }
+                } else if (step === 'new') {
+                  if (clicks.length >= 3) {
+                    handleNewPasswordSubmit(clicks);
+                  }
+                } else {
+                  if (clicks.length >= 3) {
+                    handleConfirmPasswordSubmit(clicks);
+                  }
+                }
+              }}
               clicks={
                 step === 'current' 
                   ? currentPassword

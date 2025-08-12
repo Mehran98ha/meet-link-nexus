@@ -129,6 +129,10 @@ export type Database = {
         Args: { p_user_id: string; p_current_clicks: Json; p_new_clicks: Json }
         Returns: boolean
       }
+      cleanup_user_session: {
+        Args: { p_session_token: string }
+        Returns: boolean
+      }
       get_user_public: {
         Args: { p_user_id: string }
         Returns: {
@@ -163,6 +167,10 @@ export type Database = {
       }
       update_profile_image: {
         Args: { p_user_id: string; p_image_url: string }
+        Returns: boolean
+      }
+      validate_session: {
+        Args: { p_session_token: string; p_user_id: string }
         Returns: boolean
       }
       verify_visual_clicks: {

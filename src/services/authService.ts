@@ -142,26 +142,29 @@ export const updateUserProfileImage = async (userId: string, imageUrl: string | 
 
 
 /**
- * Logout user
+ * Logout user using secure session cleanup
  */
 export const logoutUser = async (): Promise<void> => {
   const sessionToken = localStorage.getItem('auth_token');
   
   if (sessionToken) {
-    // Remove session from database
-    await supabase
-      .from('user_sessions')
-      .delete()
-      .eq('session_token', sessionToken);
+    try {
+      // Use secure RPC to cleanup session
+      await supabase.rpc('cleanup_user_session', {
+        p_session_token: sessionToken
+      });
+    } catch (error) {
+      console.error('Error cleaning up session:', error);
+    }
   }
 
-  // Clear localStorage
+  // Always clear localStorage regardless of RPC success
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_id');
 };
 
 /**
- * Check if user is authenticated
+ * Check if user is authenticated using secure session validation
  */
 export const checkAuth = async (): Promise<{ isAuthenticated: boolean; user?: User }> => {
   const sessionToken = localStorage.getItem('auth_token');
@@ -172,15 +175,14 @@ export const checkAuth = async (): Promise<{ isAuthenticated: boolean; user?: Us
   }
 
   try {
-    // Check if session is valid
-    const { data: session } = await supabase
-      .from('user_sessions')
-      .select('expires_at')
-      .eq('session_token', sessionToken)
-      .eq('user_id', userId)
-      .single();
+    // Validate session using secure RPC
+    const { data: isValid, error: sessionError } = await supabase
+      .rpc('validate_session', {
+        p_session_token: sessionToken,
+        p_user_id: userId
+      });
 
-    if (!session || new Date(session.expires_at) < new Date()) {
+    if (sessionError || !isValid) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_id');
       return { isAuthenticated: false };
